@@ -96,6 +96,7 @@ static ZEND_FUNCTION(debug_print_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
 static ZEND_FUNCTION(zend_test_func2);
+//zend thread safe 
 #ifdef ZTS
 static ZEND_FUNCTION(zend_thread_id);
 #endif
@@ -380,6 +381,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		arginfo_zend_test_func)
 	ZEND_FE(zend_test_func2,	arginfo_zend_test_func2)
+//zend thread safe 
 #ifdef ZTS
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
@@ -2098,6 +2100,7 @@ ZEND_FUNCTION(zend_test_func2)
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
 
+//zend thread safe 
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {

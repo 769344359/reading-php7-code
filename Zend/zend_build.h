@@ -22,6 +22,7 @@
 #define ZEND_TOSTR_(x) #x
 #define ZEND_TOSTR(x) ZEND_TOSTR_(x)
 
+//zend thread safe 
 #ifdef ZTS
 #define ZEND_BUILD_TS ",TS"
 #else

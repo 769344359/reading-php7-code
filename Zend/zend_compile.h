@@ -713,6 +713,7 @@ ZEND_API size_t zend_get_scanned_file_offset(void);
 
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var);
 
+//zend thread safe 
 #ifdef ZTS
 const char *zend_get_zendtext(void);
 int zend_get_zendleng(void);

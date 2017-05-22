@@ -45,6 +45,7 @@
 
 #include "zend_signal.h"
 
+//zend thread safe 
 #ifdef ZTS
 ZEND_API int zend_signal_globals_id;
 #else
@@ -57,6 +58,7 @@ ZEND_API zend_signal_globals_t zend_signal_globals;
 #define SIGNAL_END_CRITICAL() \
 	zend_sigprocmask(SIG_SETMASK, &oldmask, NULL);
 
+//zend thread safe 
 #ifdef ZTS
 # define zend_sigprocmask(signo, set, oldset) tsrm_sigmask((signo), (set), (oldset))
 #else
@@ -87,6 +89,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
 
+//zend thread safe 
 #ifdef ZTS
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
@@ -187,6 +190,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 			if (sigaction(signo, &sa, NULL) == 0) {
 				/* throw away any blocked signals */
 				zend_sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+//zend thread safe 
 #ifdef ZTS
 # define RAISE_ERROR "raise() failed\n"
 				if (raise(signo) != 0) {
@@ -390,6 +394,7 @@ void zend_signal_init(void) /* {{{ */
 void zend_signal_startup(void)
 {
 
+//zend thread safe 
 #ifdef ZTS
 	ts_allocate_id(&zend_signal_globals_id, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
 #else

@@ -42,6 +42,7 @@
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
 
+//zend thread safe 
 #ifdef ZTS
 
 BEGIN_EXTERN_C()
@@ -130,6 +131,7 @@ struct _zend_compiler_globals {
 
 	zend_stack delayed_oplines_stack;
 
+//zend thread safe 
 #ifdef ZTS
 	zval **static_members_table;
 	int last_static_member;

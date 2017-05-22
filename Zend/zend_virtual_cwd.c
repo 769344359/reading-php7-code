@@ -71,6 +71,7 @@
 MUTEX_T cwd_mutex;
 #endif
 
+//zend thread safe 
 #ifdef ZTS
 ts_rsrc_id cwd_globals_id;
 #else
@@ -486,6 +487,7 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 #endif
 	main_cwd_state.cwd = strdup(cwd);
 
+//zend thread safe 
 #ifdef ZTS
 	ts_allocate_id(&cwd_globals_id, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
 #else
@@ -1907,6 +1909,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 		return NULL;
 	}
 
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_lock(cwd_mutex);
 #endif
@@ -1915,6 +1918,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	retval = popen(command, type);
 	VCWD_CHDIR(prev_cwd);
 
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_unlock(cwd_mutex);
 #endif

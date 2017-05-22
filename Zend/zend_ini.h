@@ -120,6 +120,7 @@ END_EXTERN_C()
 #define ZEND_INI_ENTRY(name, default_value, modifiable, on_modify) \
 	ZEND_INI_ENTRY_EX(name, default_value, modifiable, on_modify, NULL)
 
+//zend thread safe 
 #ifdef ZTS
 #define STD_ZEND_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
 	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id)

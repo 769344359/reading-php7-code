@@ -5122,6 +5122,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED, CONST, CONST_FETCH)
 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), c);
 	}
 
+//zend thread safe 
 #ifdef ZTS
 	if (c->flags & CONST_PERSISTENT) {
 		ZVAL_DUP(EX_VAR(opline->result.var), &c->value);
@@ -5148,6 +5149,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 		if (OP1_TYPE == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
+//zend thread safe 
 #ifdef ZTS
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 #endif
@@ -5201,6 +5203,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 		}
 	} while (0);
 
+//zend thread safe 
 #ifdef ZTS
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		ZVAL_DUP(EX_VAR(opline->result.var), value);

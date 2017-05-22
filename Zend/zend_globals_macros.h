@@ -30,6 +30,7 @@ typedef struct _zend_ini_scanner_globals zend_ini_scanner_globals;
 BEGIN_EXTERN_C()
 
 /* Compiler */
+//zend thread safe 
 #ifdef ZTS
 # define CG(v) ZEND_TSRMG(compiler_globals_id, zend_compiler_globals *, v)
 #else
@@ -40,6 +41,7 @@ ZEND_API int zendparse(void);
 
 
 /* Executor */
+//zend thread safe 
 #ifdef ZTS
 # define EG(v) ZEND_TSRMG(executor_globals_id, zend_executor_globals *, v)
 #else
@@ -48,6 +50,7 @@ extern ZEND_API zend_executor_globals executor_globals;
 #endif
 
 /* Language Scanner */
+//zend thread safe 
 #ifdef ZTS
 # define LANG_SCNG(v) ZEND_TSRMG(language_scanner_globals_id, zend_php_scanner_globals *, v)
 extern ZEND_API ts_rsrc_id language_scanner_globals_id;
@@ -58,6 +61,7 @@ extern ZEND_API zend_php_scanner_globals language_scanner_globals;
 
 
 /* INI Scanner */
+//zend thread safe 
 #ifdef ZTS
 # define INI_SCNG(v) ZEND_TSRMG(ini_scanner_globals_id, zend_ini_scanner_globals *, v)
 extern ZEND_API ts_rsrc_id ini_scanner_globals_id;

@@ -34,6 +34,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
 
 #define ZEND_MODULE_API_NO 20160303
+//zend thread safe 
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -52,6 +53,7 @@
 
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
+//zend thread safe 
 #ifdef ZTS
 # define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id
 #else
@@ -86,6 +88,7 @@ struct _zend_module_entry {
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	const char *version;
 	size_t globals_size;
+//zend thread safe 
 #ifdef ZTS
 	ts_rsrc_id* globals_id_ptr;
 #else

@@ -149,6 +149,7 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_END_MODULE_GLOBALS(module_name)		\
 	} zend_##module_name##_globals;
 
+//zend thread safe 
 #ifdef ZTS
 
 #define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
@@ -236,6 +237,7 @@ typedef struct _zend_fcall_info_cache {
 #define INIT_OVERLOADED_NS_CLASS_ENTRY(class_container, ns, class_name, functions, handle_fcall, handle_propget, handle_propset) \
 	INIT_OVERLOADED_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions, handle_fcall, handle_propget, handle_propset)
 
+//zend thread safe 
 #ifdef ZTS
 #	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members_table:CG(static_members_table)[(zend_intptr_t)(ce)->static_members_table])
 #else

@@ -104,6 +104,7 @@
 
 /* Globals Macros */
 #define SCNG	INI_SCNG
+//zend thread safe 
 #ifdef ZTS
 ZEND_API ts_rsrc_id ini_scanner_globals_id;
 #else

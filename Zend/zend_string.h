@@ -359,6 +359,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
+//zend thread safe 
 #ifdef ZTS
 static zend_always_inline zend_string* zend_zts_interned_string_init(const char *val, size_t len)
 {

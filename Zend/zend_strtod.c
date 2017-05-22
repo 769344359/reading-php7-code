@@ -547,6 +547,7 @@ Bigint {
 
 static void destroy_freelist(void);
 
+//zend thread safe 
 #ifdef ZTS
 static MUTEX_T dtoa_mutex;
 static MUTEX_T pow5mult_mutex;
@@ -554,6 +555,7 @@ static MUTEX_T pow5mult_mutex;
 
 ZEND_API int zend_startup_strtod(void) /* {{{ */
 {
+//zend thread safe 
 #ifdef ZTS
 	dtoa_mutex = tsrm_mutex_alloc();
 	pow5mult_mutex = tsrm_mutex_alloc();
@@ -564,6 +566,7 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_free(dtoa_mutex);
 	dtoa_mutex = NULL;
