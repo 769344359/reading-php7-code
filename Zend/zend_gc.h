@@ -95,6 +95,7 @@ typedef struct _zend_gc_globals {
 
 } zend_gc_globals;
 
+//zend thread safe 
 #ifdef ZTS
 BEGIN_EXTERN_C()
 ZEND_API extern int gc_globals_id;

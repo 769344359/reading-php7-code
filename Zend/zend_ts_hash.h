@@ -26,6 +26,7 @@
 typedef struct _zend_ts_hashtable {
 	HashTable hash;
 	uint32_t reader;
+//zend thread safe 
 #ifdef ZTS
 	MUTEX_T mx_reader;
 	MUTEX_T mx_writer;

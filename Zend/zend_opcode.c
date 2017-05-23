@@ -176,6 +176,7 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 		zval *p = static_members;
 		zval *end = p + ce->default_static_members_count;
 
+//zend thread safe 
 #ifdef ZTS
 		CG(static_members_table)[(zend_intptr_t)(ce->static_members_table)] = NULL;
 #else

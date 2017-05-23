@@ -68,6 +68,7 @@ typedef enum {
 typedef intptr_t zend_intptr_t;
 typedef uintptr_t zend_uintptr_t;
 
+//zend thread safe 
 #ifdef ZTS
 #define ZEND_TLS static TSRM_TLS
 #define ZEND_EXT_TLS TSRM_TLS

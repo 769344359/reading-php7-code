@@ -24,6 +24,7 @@
 /* ts management functions */
 static void begin_read(TsHashTable *ht)
 {
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_lock(ht->mx_reader);
 	if ((++(ht->reader)) == 1) {
@@ -35,6 +36,7 @@ static void begin_read(TsHashTable *ht)
 
 static void end_read(TsHashTable *ht)
 {
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_lock(ht->mx_reader);
 	if ((--(ht->reader)) == 0) {
@@ -46,6 +48,7 @@ static void end_read(TsHashTable *ht)
 
 static void begin_write(TsHashTable *ht)
 {
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_lock(ht->mx_writer);
 #endif
@@ -53,6 +56,7 @@ static void begin_write(TsHashTable *ht)
 
 static void end_write(TsHashTable *ht)
 {
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_unlock(ht->mx_writer);
 #endif
@@ -61,6 +65,7 @@ static void end_write(TsHashTable *ht)
 /* delegates */
 ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
+//zend thread safe 
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
@@ -71,6 +76,7 @@ ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint nSize, dtor_func_t pDestr
 
 ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
 {
+//zend thread safe 
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
@@ -85,6 +91,7 @@ ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)
 	zend_hash_destroy(TS_HASH(ht));
 	end_write(ht);
 
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_free(ht->mx_reader);
 	tsrm_mutex_free(ht->mx_writer);
@@ -138,6 +145,7 @@ ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht)
 	zend_hash_graceful_destroy(TS_HASH(ht));
 	end_write(ht);
 
+//zend thread safe 
 #ifdef ZTS
 	tsrm_mutex_free(ht->mx_reader);
 	tsrm_mutex_free(ht->mx_writer);

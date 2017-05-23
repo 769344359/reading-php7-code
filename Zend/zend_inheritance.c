@@ -857,6 +857,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		do {
 			dst--;
 			src--;
+//zend thread safe 
 #ifdef ZTS
 			if (parent_ce->type != ce->type) {
 				ZVAL_DUP(dst, src);

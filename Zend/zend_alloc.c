@@ -2282,6 +2282,7 @@ typedef struct _zend_alloc_globals {
 	zend_mm_heap *mm_heap;
 } zend_alloc_globals;
 
+//zend thread safe 
 #ifdef ZTS
 static int alloc_globals_id;
 # define AG(v) ZEND_TSRMG(alloc_globals_id, zend_alloc_globals *, v)
@@ -2616,6 +2617,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 	alloc_globals->mm_heap = zend_mm_init();
 }
 
+//zend thread safe 
 #ifdef ZTS
 static void alloc_globals_dtor(zend_alloc_globals *alloc_globals)
 {
@@ -2625,6 +2627,7 @@ static void alloc_globals_dtor(zend_alloc_globals *alloc_globals)
 
 ZEND_API void start_memory_manager(void)
 {
+//zend thread safe 
 #ifdef ZTS
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
 #else

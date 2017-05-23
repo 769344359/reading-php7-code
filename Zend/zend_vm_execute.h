@@ -403,7 +403,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
 
-ZEND_API void execute_ex(zend_execute_data *ex)
+ZEND_API void execute_ex(zend_execute_data *ex) // 具体执行函数
 {
 	DCL_OPLINE
 
@@ -420,7 +420,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 
 	LOAD_OPLINE();
 	ZEND_VM_LOOP_INTERRUPT_CHECK();
-
+                //死循环
 	while (1) {
 #if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)
 			int ret;
@@ -428,7 +428,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
 		((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		if (UNEXPECTED(!OPLINE)) {
-#else
+#else                 
+                   //获得opcode 指令集对应的handler 处理指令集
+                    //ret 为 获得返回值 。
+                    //编译时期会添加zend_return  指令到opcode 数组结尾， 
+                    //而zend_return  这个opcode 的handler 会返回 -1 跳出循环
 		if (UNEXPECTED((ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)) != 0)) {
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
@@ -445,6 +449,8 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 # ifdef ZEND_VM_IP_GLOBAL_REG
 				opline = orig_opline;
 # endif
+                                    //返回  当ret小于0 也就是 zend_return 处理完之后ret = 0 。
+                                    // 所以结束循环并返回。
 				return;
 			}
 #endif
@@ -5754,6 +5760,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 		if (IS_CONST == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
+//zend thread safe 
 #ifdef ZTS
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 #endif
@@ -5807,6 +5814,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 		}
 	} while (0);
 
+//zend thread safe 
 #ifdef ZTS
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		ZVAL_DUP(EX_VAR(opline->result.var), value);
@@ -19942,6 +19950,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 		if (IS_VAR == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
+//zend thread safe 
 #ifdef ZTS
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 #endif
@@ -19995,6 +20004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 		}
 	} while (0);
 
+//zend thread safe 
 #ifdef ZTS
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		ZVAL_DUP(EX_VAR(opline->result.var), value);
@@ -29721,6 +29731,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_UNUSED_CON
 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), c);
 	}
 
+//zend thread safe 
 #ifdef ZTS
 	if (c->flags & CONST_PERSISTENT) {
 		ZVAL_DUP(EX_VAR(opline->result.var), &c->value);
@@ -29747,6 +29758,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 		if (IS_UNUSED == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
+//zend thread safe 
 #ifdef ZTS
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 #endif
@@ -29800,6 +29812,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 		}
 	} while (0);
 
+//zend thread safe 
 #ifdef ZTS
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		ZVAL_DUP(EX_VAR(opline->result.var), value);

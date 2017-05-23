@@ -87,6 +87,7 @@
 
 /* Globals Macros */
 #define SCNG	LANG_SCNG
+//zend thread safe 
 #ifdef ZTS
 ZEND_API ts_rsrc_id language_scanner_globals_id;
 #else

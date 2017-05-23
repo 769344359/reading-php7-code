@@ -38,6 +38,7 @@
 #include <stdarg.h>
 #endif
 
+//zend thread safe 
 #ifdef ZTS
 #define VIRTUAL_DIR
 #endif
@@ -236,6 +237,7 @@ typedef struct _virtual_cwd_globals {
 	realpath_cache_bucket *realpath_cache[1024];
 } virtual_cwd_globals;
 
+//zend thread safe 
 #ifdef ZTS
 extern ts_rsrc_id cwd_globals_id;
 # define CWDG(v) ZEND_TSRMG(cwd_globals_id, virtual_cwd_globals *, v)

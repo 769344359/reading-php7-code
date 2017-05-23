@@ -19,6 +19,7 @@
 #ifndef ZEND_STRTOD_INT_H
 #define ZEND_STRTOD_INT_H
 
+//zend thread safe 
 #ifdef ZTS
 #include <TSRM.h>
 #endif
@@ -120,6 +121,7 @@ typedef unsigned long int uint32_t;
 #endif
 #endif
 
+//zend thread safe 
 #ifdef ZTS
 #define MULTIPLE_THREADS 1
 

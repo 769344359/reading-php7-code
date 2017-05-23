@@ -1746,6 +1746,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
+//zend thread safe 
 #ifdef ZTS
 		int n = zend_hash_num_elements(CG(class_table));
 

@@ -33,6 +33,7 @@
 #include "zend_virtual_cwd.h"
 #include "zend_smart_str.h"
 
+//zend thread safe 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
@@ -140,6 +141,7 @@ ZEND_INI_BEGIN()
 ZEND_INI_END()
 
 
+//zend thread safe 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
@@ -398,6 +400,7 @@ static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path)
 }
 /* }}} */
 
+//zend thread safe 
 #ifdef ZTS
 static zend_bool short_tags_default      = 1;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
@@ -464,6 +467,7 @@ static void auto_global_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
+//zend thread safe 
 #ifdef ZTS
 static void function_copy_ctor(zval *zv) /* {{{ */
 {
@@ -648,6 +652,7 @@ static zend_bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions) /* {{{ */
 {
+//zend thread safe 
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
@@ -736,6 +741,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_hash_init_ex(&module_registry, 32, NULL, module_destructor_zval, 1, 0);
 	zend_init_rsrc_list_dtors();
 
+//zend thread safe 
 #ifdef ZTS
 	ts_allocate_id(&compiler_globals_id, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
 	ts_allocate_id(&executor_globals_id, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
@@ -783,6 +789,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	php_win32_cp_setup();
 #endif
 
+//zend thread safe 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 #endif
@@ -804,6 +811,7 @@ void zend_register_standard_ini_entries(void) /* {{{ */
  */
 void zend_post_startup(void) /* {{{ */
 {
+//zend thread safe 
 #ifdef ZTS
 	zend_encoding **script_encoding_list;
 
@@ -888,6 +896,7 @@ void zend_shutdown(void) /* {{{ */
 	free(GLOBAL_CONSTANTS_TABLE);
 	zend_shutdown_strtod();
 
+//zend thread safe 
 #ifdef ZTS
 	GLOBAL_FUNCTION_TABLE = NULL;
 	GLOBAL_CLASS_TABLE = NULL;
@@ -966,6 +975,7 @@ ZEND_API char *get_zend_version(void) /* {{{ */
 
 ZEND_API void zend_activate(void) /* {{{ */
 {
+//zend thread safe 
 #ifdef ZTS
 	virtual_cwd_activate();
 #endif

@@ -1830,6 +1830,7 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 
 	/* Initialize module globals */
 	if (module->globals_size) {
+//zend thread safe 
 #ifdef ZTS
 		ts_allocate_id(module->globals_id_ptr, module->globals_size, (ts_allocate_ctor) module->globals_ctor, (ts_allocate_dtor) module->globals_dtor);
 #else
@@ -2501,6 +2502,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 
 	/* Deinitilaise module globals */
 	if (module->globals_size) {
+//zend thread safe 
 #ifdef ZTS
 		if (*module->globals_id_ptr) {
 			ts_free_id(*module->globals_id_ptr);

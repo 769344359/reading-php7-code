@@ -148,6 +148,7 @@ ZEND_API int zend_ini_deactivate(void) /* {{{ */
 }
 /* }}} */
 
+//zend thread safe 
 #ifdef ZTS
 static void copy_ini_entry(zval *zv) /* {{{ */
 {
@@ -215,6 +216,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 	zval *default_value;
 	HashTable *directives = registered_zend_ini_directives;
 
+//zend thread safe 
 #ifdef ZTS
 	/* if we are called during the request, eg: from dl(),
 	 * then we should not touch the global directives table,
@@ -276,6 +278,7 @@ ZEND_API void zend_unregister_ini_entries(int module_number) /* {{{ */
 }
 /* }}} */
 
+//zend thread safe 
 #ifdef ZTS
 static int zend_ini_refresh_cache(zval *el, void *arg) /* {{{ */
 {

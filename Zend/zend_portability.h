@@ -402,6 +402,7 @@ char *alloca();
 # define Z_DBG(expr)
 #endif
 
+//zend thread safe 
 #ifdef ZTS
 # define ZTS_V 1
 #else
