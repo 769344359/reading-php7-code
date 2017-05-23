@@ -403,7 +403,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
 
-ZEND_API void execute_ex(zend_execute_data *ex)
+ZEND_API void execute_ex(zend_execute_data *ex) // 具体执行函数
 {
 	DCL_OPLINE
 
@@ -420,7 +420,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 
 	LOAD_OPLINE();
 	ZEND_VM_LOOP_INTERRUPT_CHECK();
-
+                //死循环
 	while (1) {
 #if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)
 			int ret;
@@ -428,7 +428,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
 		((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		if (UNEXPECTED(!OPLINE)) {
-#else
+#else                 
+                   //获得opcode 指令集对应的handler 处理指令集
+                    //ret 为 获得返回值 。
+                    //编译时期会添加zend_return  指令到opcode 数组结尾， 
+                    //而zend_return  这个opcode 的handler 会返回 -1 跳出循环
 		if (UNEXPECTED((ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)) != 0)) {
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
@@ -445,6 +449,8 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 # ifdef ZEND_VM_IP_GLOBAL_REG
 				opline = orig_opline;
 # endif
+                                    //返回  当ret小于0 也就是 zend_return 处理完之后ret = 0 。
+                                    // 所以结束循环并返回。
 				return;
 			}
 #endif
