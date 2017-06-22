@@ -113,7 +113,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
 #endif
-
+//导入环境变量
 static void (*php_php_import_environment_variables)(zval *array_ptr);
 
 #ifndef PHP_WIN32
@@ -127,8 +127,9 @@ static int parent = 1;
 
 static int request_body_fd;
 static int fpm_is_running = 0;
-
+//获得环境变量
 static char *sapi_cgibin_getenv(char *name, size_t name_len);
+//获得php.ini 配置文件下的参数
 static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg);
 
 #define PHP_MODE_STANDARD	1
@@ -140,7 +141,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 static char *php_optarg = NULL;
 static int php_optind = 1;
 static zend_module_entry cgi_module_entry;
-
+//启动php-fpm参数
 static const opt_struct OPTIONS[] = {
 	{'c', 1, "php-ini"},
 	{'d', 1, "define"},
@@ -1565,7 +1566,7 @@ static zend_module_entry cgi_module_entry = {
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////main函数
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -1612,7 +1613,7 @@ int main(int argc, char *argv[])
 	tsrm_startup(1, 1, 0, NULL);
 	tsrm_ls = ts_resource(0);
 #endif
-
+/////////////////////////////////////////////////////////////////////////////////////////初始化signal
 	zend_signal_startup();
 
 	sapi_startup(&cgi_sapi_module);
@@ -1892,10 +1893,13 @@ consult the installation file that came with this distribution, or visit \n\
 	request = fpm_init_request(fcgi_fd);
 
 	zend_first_try {
+////////////////////////////////////////accept 循环
 		while (EXPECTED(fcgi_accept_request(request) >= 0)) {
 			char *primary_script = NULL;
 			request_body_fd = -1;
 			SG(server_context) = (void *) request;
+
+////////////////////////////////////获取超全局变量，比如$_GET , $_POST等
 			init_request_info();
 
 			fpm_request_info();
@@ -1964,6 +1968,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 			fpm_request_executing();
 
+/////////////////////////////////////////////////////////执行脚本
 			php_execute_script(&file_handle);
 
 fastcgi_request_done:
@@ -1985,13 +1990,12 @@ fastcgi_request_done:
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 				}
 			}
-
 			fpm_request_end();
 			fpm_log_write(NULL);
 
 			efree(SG(request_info).path_translated);
 			SG(request_info).path_translated = NULL;
-
+/////////////////////////关闭请求
 			php_request_shutdown((void *) 0);
 
 			requests++;
@@ -2001,6 +2005,7 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
+//////////////////关闭 fpm
 		fcgi_destroy_request(request);
 		fcgi_shutdown();
 

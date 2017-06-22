@@ -54,7 +54,8 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	fpm_globals.pid = pid;
 	fpm_globals.run_as_root = run_as_root;
 	fpm_globals.force_stderr = force_stderr;
-
+// 分别初始化如下几个函数 
+// 其中fpm_stdio_init_main是重定向标准输入输出
 	if (0 > fpm_php_init_main()           ||
 	    0 > fpm_stdio_init_main()         ||
 	    0 > fpm_conf_init_main(test_conf, force_daemon) ||
