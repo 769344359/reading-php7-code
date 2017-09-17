@@ -201,14 +201,14 @@ static void user_config_cache_entry_dtor(zval *el)
 
 #ifdef ZTS
 static int php_cgi_globals_id;
-#define CGIG(v) TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
+#define CGIG(v) TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)      //多线程的资源管理器
 #else
 static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
 #endif
 
 #ifdef PHP_WIN32
-#define TRANSLATE_SLASHES(path) \
+#define TRANSLATE_SLASHES(path) \                         //在windows下会将反斜杠转换成斜杠的宏
 	{ \
 		char *tmp = path; \
 		while (*tmp) { \
