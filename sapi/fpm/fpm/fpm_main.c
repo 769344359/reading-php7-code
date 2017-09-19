@@ -1,4 +1,4 @@
-/*
+*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -232,8 +232,8 @@ static int module_name_cmp(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-
-	return strcasecmp(	((zend_module_entry *) Z_PTR(f->val))->name,
+    //./Zend/zend_types.h:#define Z_PTR(zval)					(zval).value.ptr     宏定义
+	return strcasecmp(	((zend_module_entry *) Z_PTR(f->val))->name,   
 						((zend_module_entry *) Z_PTR(s->val))->name);
 }
 /* }}} */
@@ -306,7 +306,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length) 
 	return fwrite(str, 1, MIN(str_length, 16384), stdout);
 #endif
 }
-/* }}} */
+/* }}} *
 
 static size_t sapi_cgibin_ub_write(const char *str, size_t str_length) /* {{{ */
 {
@@ -318,13 +318,13 @@ static size_t sapi_cgibin_ub_write(const char *str, size_t str_length) /* {{{ */
 		ret = sapi_cgibin_single_write(ptr, remaining);
 		if (!ret) {
 			php_handle_aborted_connection();
-			return str_length - remaining;
+			return str_length - remaining;              //发送了多少字节
 		}
-		ptr += ret;
+		ptr += ret;                            // 指向发送的字符串结尾
 		remaining -= ret;
 	}
 
-	return str_length;
+	return str_length;                     // 全部写入成功则返回写入长度 。
 }
 /* }}} */
 
@@ -337,14 +337,14 @@ static void sapi_cgibin_flush(void *server_context) /* {{{ */
 #ifndef PHP_WIN32
 	      !parent &&
 #endif
-	      request && !fcgi_flush(request, 0)) {
+	      request && !fcgi_flush(request, 0)) {           //写入失败则抛弃链接
 			php_handle_aborted_connection();
 		}
 		return;
 	}
 
 	/* fpm has not started yet, let use stdout instead of fcgi */
-	if (fflush(stdout) == EOF) {
+	if (fflush(stdout) == EOF) {                     //如果没有进入那个fpm_is_running 的判断，则未启动，将输出重定向到标准输出
 		php_handle_aborted_connection();
 	}
 }
