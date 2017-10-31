@@ -1,7 +1,7 @@
 
 	/* $Id: zlog.c,v 1.7 2008/05/22 21:08:32 anight Exp $ */
 	/* (c) 2004-2007 Andrei Nigmatulin */
-
+//log函数
 #include "fpm_config.h"
 
 #include <stdio.h>
@@ -18,14 +18,14 @@
 #include "fpm.h"
 #include "zend_portability.h"
 
-#define MAX_LINE_LENGTH 1024
+#define MAX_LINE_LENGTH 1024       
 
-static int zlog_fd = -1;
-static int zlog_level = ZLOG_NOTICE;
-static int launched = 0;
-static void (*external_logger)(int, char *, size_t) = NULL;
+static int zlog_fd = -1;  //  设置默认的fd
+static int zlog_level = ZLOG_NOTICE;   // 设置默认日志等级
+static int launched = 0;       // 还不清楚
+static void (*external_logger)(int, char *, size_t) = NULL;    // 日志函数指针
 
-static const char *level_names[] = {
+static const char *level_names[] = {     //等级 应该是在zlog.h 上定义zlog_debug 常量
 	[ZLOG_DEBUG]   = "DEBUG",
 	[ZLOG_NOTICE]  = "NOTICE",
 	[ZLOG_WARNING] = "WARNING",
@@ -43,13 +43,13 @@ const int syslog_priorities[] = {
 };
 #endif
 
-void zlog_set_external_logger(void (*logger)(int, char *, size_t)) /* {{{ */
+void zlog_set_external_logger(void (*logger)(int, char *, size_t)) /* {{{ */    // 赋值前面的函数指针
 {
 	external_logger = logger;
 }
 /* }}} */
 
-const char *zlog_get_level_name(int log_level) /* {{{ */
+const char *zlog_get_level_name(int log_level) /* {{{ */       // 转换函数，将int 转换相应的等级的字符串
 {
 	if (log_level < 0) {
 		log_level = zlog_level;
@@ -61,7 +61,7 @@ const char *zlog_get_level_name(int log_level) /* {{{ */
 }
 /* }}} */
 
-void zlog_set_launched(void) {
+void zlog_set_launched(void) {      
 	launched = 1;
 }
 
