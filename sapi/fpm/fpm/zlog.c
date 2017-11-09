@@ -33,7 +33,7 @@ static const char *level_names[] = {     //等级 应该是在zlog.h 上定义zl
 	[ZLOG_ALERT]   = "ALERT",
 };
 
-#ifdef HAVE_SYSLOG_H
+#ifdef HAVE_SYSLOG_H				 // 估计是c99 或者是什么的标准的数组的写法
 const int syslog_priorities[] = {
 	[ZLOG_DEBUG]   = LOG_DEBUG,
 	[ZLOG_NOTICE]  = LOG_NOTICE,
@@ -61,10 +61,10 @@ const char *zlog_get_level_name(int log_level) /* {{{ */       // 转换函数�
 }
 /* }}} */
 
-void zlog_set_launched(void) {      
+void zlog_set_launched(void) {      // 设置标志位，具体内容不清楚
 	launched = 1;
 }
-
+// 打印时间，不知道具体作用
 size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /* {{{ */
 {
 	struct tm t;
@@ -78,7 +78,7 @@ size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /*
 	return len;
 }
 /* }}} */
-
+///   感觉这里可以优化掉设置zlog_fd 为 new_fd 返回old_fd
 int zlog_set_fd(int new_fd) /* {{{ */
 {
 	int old_fd = zlog_fd;
@@ -87,7 +87,7 @@ int zlog_set_fd(int new_fd) /* {{{ */
 	return old_fd;
 }
 /* }}} */
-
+//  与上面类似
 int zlog_set_level(int new_value) /* {{{ */
 {
 	int old_value = zlog_level;

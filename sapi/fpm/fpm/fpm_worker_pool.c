@@ -17,7 +17,7 @@
 #include "fpm_conf.h"
 #include "fpm_unix.h"
 
-struct fpm_worker_pool_s *fpm_worker_all_pools;
+struct fpm_worker_pool_s *fpm_worker_all_pools;    //全局变量
 
 void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 {

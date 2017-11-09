@@ -6,7 +6,7 @@
 #define FPM_WORKER_POOL_H 1
 
 #include "fpm_conf.h"
-#include "fpm_shm.h"
+#include "fpm_shm.h"    // 匿名内存头
 
 struct fpm_worker_pool_s;
 struct fpm_child_s;
@@ -14,18 +14,18 @@ struct fpm_child_stat_s;
 struct fpm_shm_s;
 
 enum fpm_address_domain {
-	FPM_AF_UNIX = 1,
+	FPM_AF_UNIX = 1,               // 地址类型  unxi socket 或者是   tcp / ip 协议族
 	FPM_AF_INET = 2
 };
-
+///    线程池结构
 struct fpm_worker_pool_s {
-	struct fpm_worker_pool_s *next;
-	struct fpm_worker_pool_config_s *config;
+	struct fpm_worker_pool_s *next;     // 链表next
+	struct fpm_worker_pool_config_s *config;     // 大部分配置 估计是共享的  也可能不是共享的   
 	char *user, *home;									/* for setting env USER and HOME */
-	enum fpm_address_domain listen_address_domain;
-	int listening_socket;
-	int set_uid, set_gid;								/* config uid and gid */
-	int socket_uid, socket_gid, socket_mode;
+	enum fpm_address_domain listen_address_domain;    // 监听的类型
+	int listening_socket;								// socket fd 
+	int set_uid, set_gid;					// uid 和 组id			/* config uid and gid */
+	int socket_uid, socket_gid, socket_mode;    //  不知道什么
 
 	/* runtime */
 	struct fpm_child_s *children;
