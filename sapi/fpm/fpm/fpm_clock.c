@@ -15,7 +15,7 @@
 /* posix monotonic clock - preferred source of time */
 #if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
 
-static int monotonic_works;
+static int monotonic_works;    // 全局变量
 
 int fpm_clock_init() /* {{{ */
 {
