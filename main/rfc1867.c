@@ -164,6 +164,7 @@ static zend_bool is_protected_variable(char *varname) /* {{{ */
 }
 /* }}} */
 
+//php_register_variable_safe 引用自#include "php_variables.h"   
 static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, zend_bool override_protection) /* {{{ */
 {
 	if (override_protection || !is_protected_variable(var)) {
