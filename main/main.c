@@ -114,7 +114,7 @@
 #endif
 /* }}} */
 
-PHPAPI int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
+PHPAPI int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;   // 内部扩展的函数指针
 
 #ifndef ZTS
 php_core_globals core_globals;
@@ -173,25 +173,25 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 /* {{{ php_disable_functions
  */
-static void php_disable_functions(void)
+static void php_disable_functions(void)     // 读取php.ini  disable 掉要禁用的函数
 {
 	char *s = NULL, *e;
 
-	if (!*(INI_STR("disable_functions"))) {
+	if (!*(INI_STR("disable_functions"))) {     // 读取该节点 如果不存在就返回
 		return;
 	}
 
-	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));
+	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));   // 赋值 disalbe_functions 到全局变量 PG( 即 PHP GLOBAL)
 	if (e == NULL) {
-		return;
+		return;           // 如果读到的是空的就返回
 	}
-	while (*e) {
+	while (*e) {          // while 循环
 		switch (*e) {
-			case ' ':
+			case ' ':     // 空格 分号都是分隔符
 			case ',':
 				if (s) {
-					*e = '\0';
-					zend_disable_function(s, e-s);
+					*e = '\0';   
+					zend_disable_function(s, e-s);   // 
 					s = NULL;
 				}
 				break;
@@ -215,12 +215,12 @@ static void php_disable_classes(void)
 {
 	char *s = NULL, *e;
 
-	if (!*(INI_STR("disable_classes"))) {
+	if (!*(INI_STR("disable_classes"))) {  // 与 disable_functions 类似 没有值返回
 		return;
 	}
 
-	e = PG(disable_classes) = strdup(INI_STR("disable_classes"));
-
+	e = PG(disable_classes) = strdup(INI_STR("disable_classes"));  // 是否可以添加一个？
+                                                                 
 	while (*e) {
 		switch (*e) {
 			case ' ':
