@@ -247,7 +247,7 @@ static void php_disable_classes(void)
 
 /* {{{ php_binary_init
  */
-static void php_binary_init(void)
+static void php_binary_init(void)    // php 二进制初始化 还不知道在哪调用
 {
 	char *binary_location;
 #ifdef PHP_WIN32
@@ -257,8 +257,8 @@ static void php_binary_init(void)
 		PG(php_binary) = NULL;
 	}
 #else
-	if (sapi_module.executable_location) {
-		binary_location = (char *)malloc(MAXPATHLEN);
+	if (sapi_module.executable_location) {       // 获得路径 还不知道有什么用
+		binary_location = (char *)malloc(MAXPATHLEN);     
 		if (!strchr(sapi_module.executable_location, '/')) {
 			char *envpath, *path;
 			int found = 0;
@@ -293,7 +293,7 @@ static void php_binary_init(void)
 		binary_location = NULL;
 	}
 #endif
-	PG(php_binary) = binary_location;
+	PG(php_binary) = binary_location;   // 全局变量赋值
 }
 /* }}} */
 
@@ -315,7 +315,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 
 /* {{{ php_get_display_errors_mode() helper function
  */
-static int php_get_display_errors_mode(char *value, int value_length)
+static int php_get_display_errors_mode(char *value, int value_length)   // 读取配置获得标准错误输出模式并返回
 {
 	int mode;
 
@@ -348,7 +348,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
  */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value)); // 获取display 的模式
 
 	return SUCCESS;
 }
@@ -375,7 +375,7 @@ static PHP_INI_DISP(display_errors_mode)
 	mode = php_get_display_errors_mode(tmp_value, tmp_value_length);
 
 	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
-	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));
+	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));  // 判断是否是cli 或者cig中的一种
 
 	switch (mode) {
 		case PHP_DISPLAY_ERRORS_STDERR:
