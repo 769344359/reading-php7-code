@@ -709,13 +709,13 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 	if (sapi_module.log_message) {
 		sapi_module.log_message(log_message, syslog_type_int);
 	}
-	PG(in_error_log) = 0;
+	PG(in_error_log) = 0;   // 全局 unlock
 }
 /* }}} */
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */
-PHPAPI size_t php_write(void *buf, size_t size)
+PHPAPI size_t php_write(void *buf, size_t size)   // 一个write 的包裹函数
 {
 	return PHPWRITE(buf, size);
 }
@@ -723,7 +723,7 @@ PHPAPI size_t php_write(void *buf, size_t size)
 
 /* {{{ php_printf
  */
-PHPAPI size_t php_printf(const char *format, ...)
+PHPAPI size_t php_printf(const char *format, ...)  // print封装了   phpwrite 函数
 {
 	va_list args;
 	size_t ret;
@@ -746,7 +746,11 @@ PHPAPI size_t php_printf(const char *format, ...)
  * html error messages if correcponding ini setting (html_errors) is activated.
  * See: CODING_STANDARDS for details.
  */
-PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
+
+/**
+貌似是一个不太常用的函数用来打印错误并成为html 让人阅读的
+**/
+PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)   
 {
 	zend_string *replace_buffer = NULL, *replace_origin = NULL;
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
@@ -783,7 +787,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	}
 
 	/* which function caused the problem if any at all */
-	if (php_during_module_startup()) {
+	if (php_during_module_startup()) {    // 读取一个静态变量
 		function = "PHP Startup";
 	} else if (php_during_module_shutdown()) {
 		function = "PHP Shutdown";
@@ -1011,6 +1015,9 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
+/**
+错误处理函数
+**/
 /* {{{ php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
@@ -1261,6 +1268,9 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 }
 /* }}} */
 
+/**
+不知道有什么用的函数
+**/
 /* {{{ php_get_current_user
  */
 PHPAPI char *php_get_current_user(void)
@@ -1329,7 +1339,9 @@ PHPAPI char *php_get_current_user(void)
 	}
 }
 /* }}} */
-
+/**
+包裹宏，有点像linux 的系统调用    设置最大的超时时间
+**/
 /* {{{ proto bool set_time_limit(int seconds)
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
@@ -1356,6 +1368,9 @@ PHP_FUNCTION(set_time_limit)
 }
 /* }}} */
 
+/**
+打开文件的包裹函数
+**/
 /* {{{ php_fopen_wrapper_for_zend
  */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
@@ -1363,12 +1378,18 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **open
 	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
+/**
+关闭文件
+**/
 
 static void php_zend_stream_closer(void *handle) /* {{{ */
 {
 	php_stream_close((php_stream*)handle);
 }
 /* }}} */
+/**
+mmap 关闭文件
+**/
 
 static void php_zend_stream_mmap_closer(void *handle) /* {{{ */
 {
@@ -1393,6 +1414,9 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 }
 /* }}} */
 
+/**
+打开文件 但是不知道是什么的层级
+**/
 PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
 {
 	char *p;
@@ -1566,13 +1590,16 @@ static void sigchld_handler(int apar)
 	int errno_save = errno;
 
 	while (waitpid(-1, NULL, WNOHANG) > 0);
-	signal(SIGCHLD, sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);      // 子进程结束的时候向父进程发信号
 
 	errno = errno_save;
 }
 /* }}} */
 #endif
 
+/**
+估计是核心函数了 还没有找到main函数
+**/
 /* {{{ php_start_sapi()
  */
 static int php_start_sapi(void)
