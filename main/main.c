@@ -1598,7 +1598,7 @@ static void sigchld_handler(int apar)
 #endif
 
 /**
-估计是核心函数了 还没有找到main函数
+估计是核心函数了 还没有找到main函数 晚点看看能不能找到
 **/
 /* {{{ php_start_sapi()
  */
@@ -1608,7 +1608,7 @@ static int php_start_sapi(void)
 
 	if(!SG(sapi_started)) {
 		zend_try {
-			PG(during_request_startup) = 1;
+			PG(during_request_startup) = 1;    // 类似于一个全局锁 lock
 
 			/* initialize global variables */
 			PG(modules_activated) = 0;
@@ -1616,14 +1616,14 @@ static int php_start_sapi(void)
 			PG(connection_status) = PHP_CONNECTION_NORMAL;
 
 			zend_activate();
-			zend_set_timeout(EG(timeout_seconds), 1);
-			zend_activate_modules();
+			zend_set_timeout(EG(timeout_seconds), 1);  // timeout_second 貌似是全局变量
+			zend_activate_modules();                   
 			PG(modules_activated)=1;
 		} zend_catch {
 			retval = FAILURE;
 		} zend_end_try();
 
-		SG(sapi_started) = 1;
+		SG(sapi_started) = 1;      // 启动完成
 	}
 	return retval;
 }
@@ -1633,7 +1633,7 @@ static int php_start_sapi(void)
 /* {{{ php_request_startup
  */
 #ifndef APACHE_HOOKS
-int php_request_startup(void)
+int php_request_startup(void)   // 请求到来估计是一个callback 一类的函数
 {
 	int retval = SUCCESS;
 
@@ -1649,25 +1649,25 @@ int php_request_startup(void)
 #endif
 
 #if PHP_SIGCHILD
-	signal(SIGCHLD, sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);  // 注册信号  貌似这里又调用了一次设置sigchild 的信号
 #endif
 
 	zend_try {
-		PG(in_error_log) = 0;
-		PG(during_request_startup) = 1;
+		PG(in_error_log) = 0;     // 不打日志 估计
+		PG(during_request_startup) = 1;    // 不记得了
 
-		php_output_activate();
+		php_output_activate();      // 开启输出
 
 		/* initialize global variables */
-		PG(modules_activated) = 0;
-		PG(header_is_being_sent) = 0;
-		PG(connection_status) = PHP_CONNECTION_NORMAL;
-		PG(in_user_include) = 0;
+		PG(modules_activated) = 0; 
+		PG(header_is_being_sent) = 0;   // 标志位，晚点找标志位哪里设置
+		PG(connection_status) = PHP_CONNECTION_NORMAL; 
+		PG(in_user_include) = 0;  
 
-		zend_activate();
-		sapi_activate();
+		zend_activate();   // 应该是内核启动
+		sapi_activate();    // sapi 启动 有空去看看
 
-		zend_signal_activate();
+		zend_signal_activate();   // 注册信号回调函数
 
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);
@@ -1684,7 +1684,7 @@ int php_request_startup(void)
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 		}
 
-		if (PG(output_handler) && PG(output_handler)[0]) {
+		if (PG(output_handler) && PG(output_handler)[0]) {    // output 回调函数
 			zval oh;
 
 			ZVAL_STRING(&oh, PG(output_handler));
@@ -1699,8 +1699,8 @@ int php_request_startup(void)
 		/* We turn this off in php_execute_script() */
 		/* PG(during_request_startup) = 0; */
 
-		php_hash_environment();
-		zend_activate_modules();
+		php_hash_environment();  
+		zend_activate_modules();   // 外部模块的启动 会调用每个扩展
 		PG(modules_activated)=1;
 	} zend_catch {
 		retval = FAILURE;
@@ -1716,10 +1716,10 @@ int php_request_startup(void)
 	int retval = SUCCESS;
 
 #if PHP_SIGCHILD
-	signal(SIGCHLD, sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);  // 注册回调信号
 #endif
 
-	if (php_start_sapi() == FAILURE) {
+	if (php_start_sapi() == FAILURE) {   
 		return FAILURE;
 	}
 
@@ -2014,6 +2014,9 @@ PHP_MINFO_FUNCTION(php_core) { /* {{{ */
 
 /* {{{ php_register_extensions
  */
+/**
+注册扩展，我想看在哪调用的
+**/
 int php_register_extensions(zend_module_entry **ptr, int count)
 {
 	zend_module_entry **end = ptr + count;
@@ -2082,6 +2085,9 @@ void dummy_invalid_parameter_handler(
 
 /* {{{ php_module_startup
  */
+/**
+启动扩展
+**/
 int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint num_additional_modules)
 {
 	zend_utility_functions zuf;
@@ -2141,7 +2147,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 	gc_globals_ctor();
 
-	zuf.error_function = php_error_cb;
+	zuf.error_function = php_error_cb;   
 	zuf.printf_function = php_printf;
 	zuf.write_function = php_output_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
@@ -2174,9 +2180,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
-
+// 注册php版本等等的常量
 	/* Register constants */
-	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);  
 	REGISTER_MAIN_LONG_CONSTANT("PHP_MAJOR_VERSION", PHP_MAJOR_VERSION, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_MINOR_VERSION", PHP_MINOR_VERSION, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_RELEASE_VERSION", PHP_RELEASE_VERSION, CONST_PERSISTENT | CONST_CS);
@@ -2227,7 +2233,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_WORKSTATION", VER_NT_WORKSTATION, CONST_PERSISTENT | CONST_CS);
 #endif
 
-	php_binary_init();
+	php_binary_init(); 
 	if (PG(php_binary)) {
 		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS);
 	} else {
@@ -2470,6 +2476,9 @@ void php_module_shutdown(void)
 
 /* {{{ php_execute_script
  */
+/**
+php 执行脚本
+**/
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
@@ -2559,8 +2568,8 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 			int orig_start_lineno = CG(start_lineno);
 
 			CG(start_lineno) = 0;
-			if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p) == SUCCESS) {
-				CG(start_lineno) = orig_start_lineno;
+			if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p) == SUCCESS) {   // 执行脚本
+				CG(start_lineno) = orig_start_lineno;              
 				retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 2, primary_file, append_file_p) == SUCCESS);
 			}
 		} else {
