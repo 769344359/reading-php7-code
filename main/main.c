@@ -375,12 +375,12 @@ static PHP_INI_DISP(display_errors_mode)
 	mode = php_get_display_errors_mode(tmp_value, tmp_value_length);
 
 	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
-	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));  // 判断是否是cli 或者cig中的一种
+	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));  // 判断是否是cli 或者cig中的一种 是返回 1 否则返回 0
 
 	switch (mode) {
-		case PHP_DISPLAY_ERRORS_STDERR:
+		case PHP_DISPLAY_ERRORS_STDERR:  
 			if (cgi_or_cli ) {
-				PUTS("STDERR");
+				PUTS("STDERR");  
 			} else {
 				PUTS("On");
 			}
@@ -403,7 +403,7 @@ static PHP_INI_DISP(display_errors_mode)
 
 /* {{{ PHP_INI_MH
  */
-static PHP_INI_MH(OnUpdateDefaultCharset)
+static PHP_INI_MH(OnUpdateDefaultCharset)    
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
@@ -506,7 +506,7 @@ PHP_INI_MH(OnChangeBrowscap);
 /* Need to be read from the environment (?):
  * PHP_AUTO_PREPEND_FILE
  * PHP_AUTO_APPEND_FILE
- * PHP_DOCUMENT_ROOT
+ * PHP_DOCUMENT_ROOT           
  * PHP_USER_DIR
  * PHP_INCLUDE_PATH
  */
@@ -520,6 +520,9 @@ PHP_INI_MH(OnChangeBrowscap);
 # define DEFAULT_SENDMAIL_PATH "/usr/sbin/sendmail -t -i"
 #endif
 
+/*
+暂时还看不懂
+*/
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
@@ -621,19 +624,19 @@ PHP_INI_END()
 
 /* True globals (no need for thread safety */
 /* But don't make them a single int bitfield */
-static int module_initialized = 0;
+static int module_initialized = 0;    
 static int module_startup = 1;
 static int module_shutdown = 0;
 
 /* {{{ php_during_module_startup */
-static int php_during_module_startup(void)
+static int php_during_module_startup(void)  // 访问 moule_stratup 的内部操作函数 相当于java的getter 函数
 {
 	return module_startup;
 }
 /* }}} */
 
 /* {{{ php_during_module_shutdown */
-static int php_during_module_shutdown(void)
+static int php_during_module_shutdown(void)    // 一个getter 函数
 {
 	return module_shutdown;
 }
@@ -641,7 +644,7 @@ static int php_during_module_shutdown(void)
 
 /* {{{ php_get_module_initialized
  */
-PHPAPI int php_get_module_initialized(void)
+PHPAPI int php_get_module_initialized(void)     // 也是个getter 函数
 {
 	return module_initialized;
 }
@@ -658,14 +661,14 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 		/* prevent recursive invocation */
 		return;
 	}
-	PG(in_error_log) = 1;
+	PG(in_error_log) = 1;   // 全局锁  lock
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
 #ifdef HAVE_SYSLOG_H
 		if (!strcmp(PG(error_log), "syslog")) {
 			php_syslog(syslog_type_int, "%s", log_message);
-			PG(in_error_log) = 0;
+			PG(in_error_log) = 0;     // unlock
 			return;
 		}
 #endif
@@ -696,7 +699,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 			efree(tmp);
 			zend_string_free(error_time_str);
 			close(fd);
-			PG(in_error_log) = 0;
+			PG(in_error_log) = 0;     // 相当于一个全局锁
 			return;
 		}
 	}
