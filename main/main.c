@@ -114,7 +114,7 @@
 #endif
 /* }}} */
 
-PHPAPI int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
+PHPAPI int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;   // 内部扩展的函数指针
 
 #ifndef ZTS
 php_core_globals core_globals;
@@ -173,25 +173,25 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 /* {{{ php_disable_functions
  */
-static void php_disable_functions(void)
+static void php_disable_functions(void)     // 读取php.ini  disable 掉要禁用的函数
 {
 	char *s = NULL, *e;
 
-	if (!*(INI_STR("disable_functions"))) {
+	if (!*(INI_STR("disable_functions"))) {     // 读取该节点 如果不存在就返回
 		return;
 	}
 
-	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));
+	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));   // 赋值 disalbe_functions 到全局变量 PG( 即 PHP GLOBAL)
 	if (e == NULL) {
-		return;
+		return;           // 如果读到的是空的就返回
 	}
-	while (*e) {
+	while (*e) {          // while 循环
 		switch (*e) {
-			case ' ':
+			case ' ':     // 空格 分号都是分隔符
 			case ',':
 				if (s) {
-					*e = '\0';
-					zend_disable_function(s, e-s);
+					*e = '\0';   
+					zend_disable_function(s, e-s);   // 
 					s = NULL;
 				}
 				break;
@@ -215,12 +215,12 @@ static void php_disable_classes(void)
 {
 	char *s = NULL, *e;
 
-	if (!*(INI_STR("disable_classes"))) {
+	if (!*(INI_STR("disable_classes"))) {  // 与 disable_functions 类似 没有值返回
 		return;
 	}
 
-	e = PG(disable_classes) = strdup(INI_STR("disable_classes"));
-
+	e = PG(disable_classes) = strdup(INI_STR("disable_classes"));  // 是否可以添加一个？
+                                                                 
 	while (*e) {
 		switch (*e) {
 			case ' ':
@@ -247,7 +247,7 @@ static void php_disable_classes(void)
 
 /* {{{ php_binary_init
  */
-static void php_binary_init(void)
+static void php_binary_init(void)    // php 二进制初始化 还不知道在哪调用
 {
 	char *binary_location;
 #ifdef PHP_WIN32
@@ -257,8 +257,8 @@ static void php_binary_init(void)
 		PG(php_binary) = NULL;
 	}
 #else
-	if (sapi_module.executable_location) {
-		binary_location = (char *)malloc(MAXPATHLEN);
+	if (sapi_module.executable_location) {       // 获得路径 还不知道有什么用
+		binary_location = (char *)malloc(MAXPATHLEN);     
 		if (!strchr(sapi_module.executable_location, '/')) {
 			char *envpath, *path;
 			int found = 0;
@@ -293,7 +293,7 @@ static void php_binary_init(void)
 		binary_location = NULL;
 	}
 #endif
-	PG(php_binary) = binary_location;
+	PG(php_binary) = binary_location;   // 全局变量赋值
 }
 /* }}} */
 
@@ -315,7 +315,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 
 /* {{{ php_get_display_errors_mode() helper function
  */
-static int php_get_display_errors_mode(char *value, int value_length)
+static int php_get_display_errors_mode(char *value, int value_length)   // 读取配置获得标准错误输出模式并返回
 {
 	int mode;
 
@@ -348,7 +348,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
  */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value)); // 获取display 的模式
 
 	return SUCCESS;
 }
@@ -375,12 +375,12 @@ static PHP_INI_DISP(display_errors_mode)
 	mode = php_get_display_errors_mode(tmp_value, tmp_value_length);
 
 	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
-	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));
+	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));  // 判断是否是cli 或者cig中的一种 是返回 1 否则返回 0
 
 	switch (mode) {
-		case PHP_DISPLAY_ERRORS_STDERR:
+		case PHP_DISPLAY_ERRORS_STDERR:  
 			if (cgi_or_cli ) {
-				PUTS("STDERR");
+				PUTS("STDERR");  
 			} else {
 				PUTS("On");
 			}
@@ -403,7 +403,7 @@ static PHP_INI_DISP(display_errors_mode)
 
 /* {{{ PHP_INI_MH
  */
-static PHP_INI_MH(OnUpdateDefaultCharset)
+static PHP_INI_MH(OnUpdateDefaultCharset)    
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
@@ -506,7 +506,7 @@ PHP_INI_MH(OnChangeBrowscap);
 /* Need to be read from the environment (?):
  * PHP_AUTO_PREPEND_FILE
  * PHP_AUTO_APPEND_FILE
- * PHP_DOCUMENT_ROOT
+ * PHP_DOCUMENT_ROOT           
  * PHP_USER_DIR
  * PHP_INCLUDE_PATH
  */
@@ -520,6 +520,9 @@ PHP_INI_MH(OnChangeBrowscap);
 # define DEFAULT_SENDMAIL_PATH "/usr/sbin/sendmail -t -i"
 #endif
 
+/*
+暂时还看不懂
+*/
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
@@ -621,19 +624,19 @@ PHP_INI_END()
 
 /* True globals (no need for thread safety */
 /* But don't make them a single int bitfield */
-static int module_initialized = 0;
+static int module_initialized = 0;    
 static int module_startup = 1;
 static int module_shutdown = 0;
 
 /* {{{ php_during_module_startup */
-static int php_during_module_startup(void)
+static int php_during_module_startup(void)  // 访问 moule_stratup 的内部操作函数 相当于java的getter 函数
 {
 	return module_startup;
 }
 /* }}} */
 
 /* {{{ php_during_module_shutdown */
-static int php_during_module_shutdown(void)
+static int php_during_module_shutdown(void)    // 一个getter 函数
 {
 	return module_shutdown;
 }
@@ -641,7 +644,7 @@ static int php_during_module_shutdown(void)
 
 /* {{{ php_get_module_initialized
  */
-PHPAPI int php_get_module_initialized(void)
+PHPAPI int php_get_module_initialized(void)     // 也是个getter 函数
 {
 	return module_initialized;
 }
@@ -658,14 +661,14 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 		/* prevent recursive invocation */
 		return;
 	}
-	PG(in_error_log) = 1;
+	PG(in_error_log) = 1;   // 全局锁  lock
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
 #ifdef HAVE_SYSLOG_H
 		if (!strcmp(PG(error_log), "syslog")) {
 			php_syslog(syslog_type_int, "%s", log_message);
-			PG(in_error_log) = 0;
+			PG(in_error_log) = 0;     // unlock
 			return;
 		}
 #endif
@@ -696,7 +699,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 			efree(tmp);
 			zend_string_free(error_time_str);
 			close(fd);
-			PG(in_error_log) = 0;
+			PG(in_error_log) = 0;     // 相当于一个全局锁
 			return;
 		}
 	}
@@ -706,13 +709,13 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 	if (sapi_module.log_message) {
 		sapi_module.log_message(log_message, syslog_type_int);
 	}
-	PG(in_error_log) = 0;
+	PG(in_error_log) = 0;   // 全局 unlock
 }
 /* }}} */
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */
-PHPAPI size_t php_write(void *buf, size_t size)
+PHPAPI size_t php_write(void *buf, size_t size)   // 一个write 的包裹函数
 {
 	return PHPWRITE(buf, size);
 }
@@ -720,7 +723,7 @@ PHPAPI size_t php_write(void *buf, size_t size)
 
 /* {{{ php_printf
  */
-PHPAPI size_t php_printf(const char *format, ...)
+PHPAPI size_t php_printf(const char *format, ...)  // print封装了   phpwrite 函数
 {
 	va_list args;
 	size_t ret;
@@ -743,7 +746,11 @@ PHPAPI size_t php_printf(const char *format, ...)
  * html error messages if correcponding ini setting (html_errors) is activated.
  * See: CODING_STANDARDS for details.
  */
-PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
+
+/**
+貌似是一个不太常用的函数用来打印错误并成为html 让人阅读的
+**/
+PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)   
 {
 	zend_string *replace_buffer = NULL, *replace_origin = NULL;
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
@@ -780,7 +787,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	}
 
 	/* which function caused the problem if any at all */
-	if (php_during_module_startup()) {
+	if (php_during_module_startup()) {    // 读取一个静态变量
 		function = "PHP Startup";
 	} else if (php_during_module_shutdown()) {
 		function = "PHP Shutdown";
@@ -1008,6 +1015,9 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
+/**
+错误处理函数
+**/
 /* {{{ php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
@@ -1258,6 +1268,9 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 }
 /* }}} */
 
+/**
+不知道有什么用的函数
+**/
 /* {{{ php_get_current_user
  */
 PHPAPI char *php_get_current_user(void)
@@ -1326,7 +1339,9 @@ PHPAPI char *php_get_current_user(void)
 	}
 }
 /* }}} */
-
+/**
+包裹宏，有点像linux 的系统调用    设置最大的超时时间
+**/
 /* {{{ proto bool set_time_limit(int seconds)
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
@@ -1353,6 +1368,9 @@ PHP_FUNCTION(set_time_limit)
 }
 /* }}} */
 
+/**
+打开文件的包裹函数
+**/
 /* {{{ php_fopen_wrapper_for_zend
  */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
@@ -1360,12 +1378,18 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **open
 	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
+/**
+关闭文件
+**/
 
 static void php_zend_stream_closer(void *handle) /* {{{ */
 {
 	php_stream_close((php_stream*)handle);
 }
 /* }}} */
+/**
+mmap 关闭文件
+**/
 
 static void php_zend_stream_mmap_closer(void *handle) /* {{{ */
 {
@@ -1390,6 +1414,9 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 }
 /* }}} */
 
+/**
+打开文件 但是不知道是什么的层级
+**/
 PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
 {
 	char *p;
@@ -1563,13 +1590,16 @@ static void sigchld_handler(int apar)
 	int errno_save = errno;
 
 	while (waitpid(-1, NULL, WNOHANG) > 0);
-	signal(SIGCHLD, sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);      // 子进程结束的时候向父进程发信号
 
 	errno = errno_save;
 }
 /* }}} */
 #endif
 
+/**
+估计是核心函数了 还没有找到main函数 晚点看看能不能找到
+**/
 /* {{{ php_start_sapi()
  */
 static int php_start_sapi(void)
@@ -1578,7 +1608,7 @@ static int php_start_sapi(void)
 
 	if(!SG(sapi_started)) {
 		zend_try {
-			PG(during_request_startup) = 1;
+			PG(during_request_startup) = 1;    // 类似于一个全局锁 lock
 
 			/* initialize global variables */
 			PG(modules_activated) = 0;
@@ -1586,14 +1616,14 @@ static int php_start_sapi(void)
 			PG(connection_status) = PHP_CONNECTION_NORMAL;
 
 			zend_activate();
-			zend_set_timeout(EG(timeout_seconds), 1);
-			zend_activate_modules();
+			zend_set_timeout(EG(timeout_seconds), 1);  // timeout_second 貌似是全局变量
+			zend_activate_modules();                   
 			PG(modules_activated)=1;
 		} zend_catch {
 			retval = FAILURE;
 		} zend_end_try();
 
-		SG(sapi_started) = 1;
+		SG(sapi_started) = 1;      // 启动完成
 	}
 	return retval;
 }
@@ -1603,7 +1633,7 @@ static int php_start_sapi(void)
 /* {{{ php_request_startup
  */
 #ifndef APACHE_HOOKS
-int php_request_startup(void)
+int php_request_startup(void)   // 请求到来估计是一个callback 一类的函数
 {
 	int retval = SUCCESS;
 
@@ -1619,25 +1649,25 @@ int php_request_startup(void)
 #endif
 
 #if PHP_SIGCHILD
-	signal(SIGCHLD, sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);  // 注册信号  貌似这里又调用了一次设置sigchild 的信号
 #endif
 
 	zend_try {
-		PG(in_error_log) = 0;
-		PG(during_request_startup) = 1;
+		PG(in_error_log) = 0;     // 不打日志 估计
+		PG(during_request_startup) = 1;    // 不记得了
 
-		php_output_activate();
+		php_output_activate();      // 开启输出
 
 		/* initialize global variables */
-		PG(modules_activated) = 0;
-		PG(header_is_being_sent) = 0;
-		PG(connection_status) = PHP_CONNECTION_NORMAL;
-		PG(in_user_include) = 0;
+		PG(modules_activated) = 0; 
+		PG(header_is_being_sent) = 0;   // 标志位，晚点找标志位哪里设置
+		PG(connection_status) = PHP_CONNECTION_NORMAL; 
+		PG(in_user_include) = 0;  
 
-		zend_activate();
-		sapi_activate();
+		zend_activate();   // 应该是内核启动
+		sapi_activate();    // sapi 启动 有空去看看
 
-		zend_signal_activate();
+		zend_signal_activate();   // 注册信号回调函数
 
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);
@@ -1654,7 +1684,7 @@ int php_request_startup(void)
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 		}
 
-		if (PG(output_handler) && PG(output_handler)[0]) {
+		if (PG(output_handler) && PG(output_handler)[0]) {    // output 回调函数
 			zval oh;
 
 			ZVAL_STRING(&oh, PG(output_handler));
@@ -1669,8 +1699,8 @@ int php_request_startup(void)
 		/* We turn this off in php_execute_script() */
 		/* PG(during_request_startup) = 0; */
 
-		php_hash_environment();
-		zend_activate_modules();
+		php_hash_environment();  
+		zend_activate_modules();   // 外部模块的启动 会调用每个扩展
 		PG(modules_activated)=1;
 	} zend_catch {
 		retval = FAILURE;
@@ -1686,10 +1716,10 @@ int php_request_startup(void)
 	int retval = SUCCESS;
 
 #if PHP_SIGCHILD
-	signal(SIGCHLD, sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);  // 注册回调信号
 #endif
 
-	if (php_start_sapi() == FAILURE) {
+	if (php_start_sapi() == FAILURE) {   
 		return FAILURE;
 	}
 
@@ -1984,6 +2014,9 @@ PHP_MINFO_FUNCTION(php_core) { /* {{{ */
 
 /* {{{ php_register_extensions
  */
+/**
+注册扩展，我想看在哪调用的
+**/
 int php_register_extensions(zend_module_entry **ptr, int count)
 {
 	zend_module_entry **end = ptr + count;
@@ -2052,6 +2085,9 @@ void dummy_invalid_parameter_handler(
 
 /* {{{ php_module_startup
  */
+/**
+启动扩展
+**/
 int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint num_additional_modules)
 {
 	zend_utility_functions zuf;
@@ -2111,7 +2147,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 	gc_globals_ctor();
 
-	zuf.error_function = php_error_cb;
+	zuf.error_function = php_error_cb;   
 	zuf.printf_function = php_printf;
 	zuf.write_function = php_output_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
@@ -2144,9 +2180,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
-
+// 注册php版本等等的常量
 	/* Register constants */
-	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);  
 	REGISTER_MAIN_LONG_CONSTANT("PHP_MAJOR_VERSION", PHP_MAJOR_VERSION, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_MINOR_VERSION", PHP_MINOR_VERSION, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_RELEASE_VERSION", PHP_RELEASE_VERSION, CONST_PERSISTENT | CONST_CS);
@@ -2197,7 +2233,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_WORKSTATION", VER_NT_WORKSTATION, CONST_PERSISTENT | CONST_CS);
 #endif
 
-	php_binary_init();
+	php_binary_init(); 
 	if (PG(php_binary)) {
 		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS);
 	} else {
@@ -2440,6 +2476,9 @@ void php_module_shutdown(void)
 
 /* {{{ php_execute_script
  */
+/**
+php 执行脚本
+**/
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
@@ -2529,8 +2568,8 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 			int orig_start_lineno = CG(start_lineno);
 
 			CG(start_lineno) = 0;
-			if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p) == SUCCESS) {
-				CG(start_lineno) = orig_start_lineno;
+			if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p) == SUCCESS) {   // 执行脚本
+				CG(start_lineno) = orig_start_lineno;              
 				retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 2, primary_file, append_file_p) == SUCCESS);
 			}
 		} else {

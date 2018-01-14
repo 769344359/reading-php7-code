@@ -163,6 +163,9 @@ static const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
+/**
+定义一堆内部常量
+**/
 typedef struct _php_cgi_globals_struct {
 	zend_bool rfc2616_headers;
 	zend_bool nph;
@@ -220,6 +223,9 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
+/**
+打印模块信息
+**/
 static int print_module_info(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = Z_PTR_P(zv);
@@ -237,7 +243,7 @@ static int module_name_cmp(const void *a, const void *b) /* {{{ */
 						((zend_module_entry *) Z_PTR(s->val))->name);
 }
 /* }}} */
-
+/**打印所有的模块的信息**/
 static void print_modules(void) /* {{{ */
 {
 	HashTable sorted_registry;
@@ -249,6 +255,13 @@ static void print_modules(void) /* {{{ */
 	zend_hash_destroy(&sorted_registry);
 }
 /* }}} */
+
+/**
+打印扩展信息 
+**/
+/**
+发现一个很奇怪的函数居然有一个参数没用到
+**/
 
 static int print_extension_info(zend_extension *ext, void *arg) /* {{{ */
 {
@@ -277,11 +290,14 @@ static void print_extensions(void) /* {{{ */
 }
 /* }}} */
 
-#ifndef STDOUT_FILENO
-#define STDOUT_FILENO 1
+#ifndef STDOUT_FILENO               
+#define STDOUT_FILENO 1   // 定义标准文件输出
 #endif
 
-static inline size_t sapi_cgibin_single_write(const char *str, uint str_length) /* {{{ */
+/**
+php_fpm 的输出函数
+**/
+static inline size_t sapi_cgibin_single_write(const char *str, uint str_length) /* {{{ */   
 {
 	ssize_t ret;
 

@@ -55,9 +55,11 @@
 static char *rcsid = "$OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp $";
 #endif /* LIBC_SCCS and not lint */
 
-#include <sys/types.h>
-#include <string.h>
+#include <sys/types.h>      // 系统库
+#include <string.h>         //  c 标准库
 
+
+// 非二进制安全？
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).
