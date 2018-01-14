@@ -19,7 +19,7 @@
 
 struct fpm_worker_pool_s *fpm_worker_all_pools;    //全局变量
 
-void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
+void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */   ///    释放配置  其实这个函数释放掉所有的指针再释放掉自己
 {
 	if (wp->config) {
 		free(wp->config);
@@ -30,12 +30,12 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->home) {
 		free(wp->home);
 	}
-	fpm_unix_free_socket_premissions(wp);
+	fpm_unix_free_socket_premissions(wp);                        
 	free(wp);
 }
 /* }}} */
 
-static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
+static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */      // 应该是清空掉整个 fpm_worker_all_pools 这个全局变量的所有值
 {
 	struct fpm_worker_pool_s *wp, *wp_next;
 
