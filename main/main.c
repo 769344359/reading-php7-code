@@ -2086,7 +2086,7 @@ void dummy_invalid_parameter_handler(
 /* {{{ php_module_startup
  */
 /**
-启动扩展
+不是启动扩展而是启动内部模块
 **/
 int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint num_additional_modules)
 {
@@ -2275,13 +2275,13 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
-
+/////////// 注册内部扩展
 	/* startup extensions statically compiled in */
 	if (php_register_internal_extensions_func() == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
-
+/////////////////////////// 注册扩展时机
 	/* start additional PHP extensions */
 	php_register_extensions_bc(additional_modules, num_additional_modules);
 
