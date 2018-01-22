@@ -95,7 +95,7 @@ run_child: /* only workers reach this point */
 		while (EXPECTED(fcgi_accept_request(request) >= 0)) {  // (1)  内部主要是accept 函数 
 			char *primary_script = NULL;
 			request_body_fd = -1;
-			SG(server_context) = (void *) request;
+			SG(server_context) = (void *) request;  // （2） 设置上下文
 			init_request_info();
 
 			fpm_request_info();
@@ -143,7 +143,7 @@ run_child: /* only workers reach this point */
 			primary_script = estrdup(SG(request_info).path_translated);
 
 			/* path_translated exists, we can continue ! */
-			if (UNEXPECTED(php_fopen_primary_script(&file_handle) == FAILURE)) {
+			if (UNEXPECTED(php_fopen_primary_script(&file_handle) == FAILURE)) {  //（3） 转换路径
 				zend_try {
 					zlog(ZLOG_ERROR, "Unable to open primary script: %s (%s)", primary_script, strerror(errno));
 					if (errno == EACCES) {
@@ -164,7 +164,7 @@ run_child: /* only workers reach this point */
 
 			fpm_request_executing();
 
-			php_execute_script(&file_handle);
+			php_execute_script(&file_handle);  // （4）核心函数 执行脚本
 
 fastcgi_request_done:
 			if (EXPECTED(primary_script)) {
@@ -205,4 +205,82 @@ fastcgi_request_done:
 ```
 -  (1) 首先我们看到 while 循环里面有宏 `EXPECTED` 以及函数`fcgi_accept_request`
 `while (EXPECTED(fcgi_accept_request(request) >= 0)) {  // (1)  内部主要是accept 函数 `
+
+```
+// 这里去掉了win32 相关的代码
+int fcgi_accept_request(fcgi_request *req)
+{
+    ...
+		int listen_socket = req->listen_socket;
+	...
+		req->hook.on_accept();
+
+		FCGI_LOCK(req->listen_socket);
+		req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
+		FCGI_UNLOCK(req->listen_socket);
+
+	...
+		if (fcgi_read_request(req)) {
+			return req->fd;
+	...
+}
+```
+不考虑网络模型的话（epoll kpoll 等等），其实就是一个`accept` 函数 然后返回一个文件描述符`return req->fd;`
+
+- （2） 调用完`fcgi_accept_request` 后就对全局变量赋值`fcgi_accept_request`
+- （3） 路径转换 `php_fopen_primary_script`
+```
+			/* path_translated exists, we can continue ! */
+			if (UNEXPECTED(php_fopen_primary_script(&file_handle) == FAILURE)) {
+```
+- （4） 核心函数 ，执行脚本
+
+---
+分割线会详细讲述
+
+> `zend_file_handle` 结构 ，我们很容易可以看出是一个描述文件的结构其实和文件描述符是类似的
+```
+typedef struct _zend_file_handle {
+	union {
+		int           fd;
+		FILE          *fp;
+		zend_stream   stream;
+	} handle;
+	const char        *filename;
+	zend_string       *opened_path;
+	zend_stream_type  type;
+	zend_bool free_filename;
+} zend_file_handle;
+```
+> 执行函数`php_execute_script`，会调用 `zend_execute_scripts`
+```
+PHPAPI int php_execute_script(zend_file_handle *primary_file){
+	...
+	retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+	...
+
+}
+```
+然后我们看一下`zend_execute_scripts`定义
+
+> `zend_execute_scripts` 定义
+```
+ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */
+{
+	...
+		op_array = zend_compile_file(file_handle, type); // 编译获得opcode
+	...
+		if (op_array) {
+			zend_execute(op_array, retval);    // 执行opcode 的函数
+			zend_exception_restore();
+			zend_try_exception_handler();
+			if (EG(exception)) {
+				zend_exception_error(EG(exception), E_ERROR);
+			}
+			...
+		} 	
+	...
+}
+```
+
 
