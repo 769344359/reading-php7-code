@@ -1792,13 +1792,13 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, size_t key_len, zv
 	return SUCCESS;
 }
 /* }}} */
-
+//////////////////   加载扩展
 ZEND_API int zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 {
 	size_t name_len;
 	zend_string *lcname;
 
-	if (module->module_started) {
+	if (module->module_started) {   // 判断是否加载过
 		return SUCCESS;
 	}
 	module->module_started = 1;
@@ -1834,16 +1834,16 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 #ifdef ZTS
 		ts_allocate_id(module->globals_id_ptr, module->globals_size, (ts_allocate_ctor) module->globals_ctor, (ts_allocate_dtor) module->globals_dtor);
 #else
-		if (module->globals_ctor) {
+		if (module->globals_ctor) {       // 注册全局变量
 			module->globals_ctor(module->globals_ptr);
 		}
 #endif
 	}
 	if (module->module_startup_func) {
-		EG(current_module) = module;
-		if (module->module_startup_func(module->type, module->module_number)==FAILURE) {
-			zend_error_noreturn(E_CORE_ERROR,"Unable to start %s module", module->name);
-			EG(current_module) = NULL;
+		EG(current_module) = module;   // execute_group 
+		if (module->module_startup_func(module->type, module->module_number)==FAILURE) {  // 注册失败则打印
+			zend_error_noreturn(E_CORE_ERROR,"Unable to start %s module", module->name);  
+			EG(current_module) = NULL;  // 清空
 			return FAILURE;
 		}
 		EG(current_module) = NULL;
@@ -1966,8 +1966,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 
 ZEND_API int zend_startup_modules(void) /* {{{ */
 {
-	zend_hash_sort_ex(&module_registry, zend_sort_modules, NULL, 0);
-	zend_hash_apply(&module_registry, zend_startup_module_zval);
+	zend_hash_sort_ex(&module_registry, zend_sort_modules, NULL, 0);  // 对扩展进行排序
+	zend_hash_apply(&module_registry, zend_startup_module_zval);      // 调用minit开始函数
 	return SUCCESS;
 }
 /* }}} */

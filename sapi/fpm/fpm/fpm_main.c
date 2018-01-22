@@ -1632,12 +1632,12 @@ int main(int argc, char *argv[])
 /////////////////////////////////////////////////////////////////////////////////////////初始化signal
 	zend_signal_startup();
 
-	sapi_startup(&cgi_sapi_module);
+	sapi_startup(&cgi_sapi_module);  // 将cgi_sapi_module赋值给一个全局变量
 	cgi_sapi_module.php_ini_path_override = NULL;
 	cgi_sapi_module.php_ini_ignore_cwd = 1;
 
 #ifndef HAVE_ATTRIBUTE_WEAK
-	fcgi_set_logger(fpm_fcgi_log);
+	fcgi_set_logger(fpm_fcgi_log);  // 设置回调函数
 #endif
 
 	fcgi_init();
