@@ -284,6 +284,8 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 ```
 
 > `zend_compile_file` 是一个函数指针，指向 他等于 `compile_file`
+
+然后我们看一下函数`compile_file` 的定义，其中`compile_file` 会调用函数`zend_compile`
 ```
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 {
@@ -307,4 +309,62 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 }
 ```
 
+> 核心函数 `zend_compile`  是由 lex/yacc  或者bison 这类工具去生成相应的c 源文件，所以你会在 `zend_language_scanner.c` 也会看到`zend_compile` ，但是其实是在`php-7.1.8-src\Zend\zend_language_scanner.l` 文件下生成的
+
+```
+// php-7.1.8-src\Zend\zend_language_scanner.l 下的`zend_compile` 函数
+static zend_op_array *zend_compile(int type)   // 核心函数 貌似没有注释
+{
+	zend_op_array *op_array = NULL;
+	zend_bool original_in_compilation = CG(in_compilation);
+
+	CG(in_compilation) = 1;
+	CG(ast) = NULL;
+	CG(ast_arena) = zend_arena_create(1024 * 32);
+
+	if (!zendparse()) {         //////////////////// 重点函数
+		int last_lineno = CG(zend_lineno);
+		zend_file_context original_file_context;
+		zend_oparray_context original_oparray_context;
+		zend_op_array *original_active_op_array = CG(active_op_array);
+
+		op_array = emalloc(sizeof(zend_op_array));
+		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
+		CG(active_op_array) = op_array;
+
+		if (zend_ast_process) {
+			zend_ast_process(CG(ast));
+		}
+
+		zend_file_context_begin(&original_file_context);
+		zend_oparray_context_begin(&original_oparray_context);
+		zend_compile_top_stmt(CG(ast));
+		CG(zend_lineno) = last_lineno;
+		zend_emit_final_return(type == ZEND_USER_FUNCTION);
+		op_array->line_start = 1;
+		op_array->line_end = last_lineno;
+		pass_two(op_array);
+		zend_oparray_context_end(&original_oparray_context);
+		zend_file_context_end(&original_file_context);
+
+		CG(active_op_array) = original_active_op_array;
+	}
+
+	zend_ast_destroy(CG(ast));
+	zend_arena_destroy(CG(ast_arena));
+
+	CG(in_compilation) = original_in_compilation;
+
+	return op_array;
+}
+```
+> 快到了最后的几步了
+
+我们看到
+```
+static zend_op_array *zend_compile(int type)   // 核心函数 貌似没有注释
+{
+
+}
+```
 
