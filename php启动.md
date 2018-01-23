@@ -283,4 +283,28 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 }
 ```
 
+> `zend_compile_file` 是一个函数指针，指向 他等于 `compile_file`
+```
+ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
+{
+	zend_lex_state original_lex_state;
+	zend_op_array *op_array = NULL;
+	zend_save_lexical_state(&original_lex_state);
+
+	if (open_file_for_scanning(file_handle)==FAILURE) {
+		if (type==ZEND_REQUIRE) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+			zend_bailout();
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		}
+	} else {
+		op_array = zend_compile(ZEND_USER_FUNCTION);
+	}
+
+	zend_restore_lexical_state(&original_lex_state);
+	return op_array;
+}
+```
+
 
