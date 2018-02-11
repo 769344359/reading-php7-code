@@ -1,7 +1,17 @@
 # mysql pod
-
 ## 介绍 mysqlnd
-首先mysqlnd 是php 自带的mysql 扩展，`mysqlnd`是`mysql native driver` 的简称 
+首先mysqlnd 是php 自带的mysql 扩展，`mysqlnd`是`mysql native driver` 的简称,主要的文件都在ext/mysqlnd 的目录下
+ 执行 命令
+ 
+ ```
+ cd /ext/mysqldn
+ find . | wc -l
+ 54 
+ ```
+ 
+即该目录下有 **54** 个文件
+
+
 在文件 `/ext/mysqlnd/mysqlnd_ps.c`
 
  
