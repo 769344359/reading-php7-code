@@ -1,6 +1,7 @@
 [php gc 论文](http://researcher.watson.ibm.com/researcher/files/us-bacon/Bacon01Concurrent.pdf)
 
 > php gc 回收
+
 ***
 ### 1导言
 40年前,垃圾回收主要是使用两种方法:
