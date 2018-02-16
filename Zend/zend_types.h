@@ -85,7 +85,7 @@ typedef struct _zend_execute_data    zend_execute_data;
 typedef struct _zval_struct     zval;
 
 typedef struct _zend_refcounted zend_refcounted;
-typedef struct _zend_string     zend_string;
+typedef struct _zend_string     zend_string; //  定义
 typedef struct _zend_array      zend_array;
 typedef struct _zend_object     zend_object;
 typedef struct _zend_resource   zend_resource;
@@ -162,10 +162,10 @@ struct _zend_refcounted {
 };
 
 struct _zend_string {
-	zend_refcounted_h gc;
-	zend_ulong        h;                /* hash value */
-	size_t            len;
-	char              val[1];
+	zend_refcounted_h gc;     // 垃圾回收对象
+	zend_ulong        h;                /* hash value */     // 应该是hash33 后的函数
+	size_t            len;		 // 字符串长度
+	char              val[1];    //  应该是斜杠0 然后后面可以只分配一次
 };
 
 typedef struct _Bucket {

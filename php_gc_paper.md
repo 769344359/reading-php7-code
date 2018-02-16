@@ -2,6 +2,10 @@
 
 > php gc 回收
 
+```Our synchronous algorithm is similar to Lins’ algorithm: when reference counts are decremented,we place potential roots of cyclic garbage into a buffer called Roots
+.
+
+```
 ***
 ### 1导言
 40年前,垃圾回收主要是使用两种方法:

@@ -134,7 +134,7 @@ ZEND_API int (*gc_collect_cycles)(void);
 	do { GC_TRACE_SET_COLOR(ref, GC_PURPLE); GC_INFO_SET_PURPLE(GC_INFO(ref)); } while (0)
 
 #if ZEND_GC_DEBUG > 1
-static const char *gc_color_name(uint32_t color) {
+static const char *gc_color_name(uint32_t color) { // 一个转换函数
 	switch (color) {
 		case GC_BLACK: return "black";
 		case GC_WHITE: return "white";
@@ -143,7 +143,7 @@ static const char *gc_color_name(uint32_t color) {
 		default: return "unknown";
 	}
 }
-static void gc_trace_ref(zend_refcounted *ref) {
+static void gc_trace_ref(zend_refcounted *ref) {  
 	if (GC_TYPE(ref) == IS_OBJECT) {
 		zend_object *obj = (zend_object *) ref;
 		fprintf(stderr, "[%p] rc=%d addr=%d %s object(%s)#%d ",
@@ -165,7 +165,7 @@ static void gc_trace_ref(zend_refcounted *ref) {
 }
 #endif
 
-static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
+static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root) // 从 possible roots 中移除对象
 {
 	root->next->prev = root->prev;
 	root->prev->next = root->next;
@@ -255,7 +255,7 @@ ZEND_API void gc_reset(void)
 		GC_G(unused) = NULL;
 		GC_G(first_unused) = NULL;
 		GC_G(last_unused) = NULL;
-	}
+}
 }
 
 ZEND_API void gc_init(void)
@@ -266,7 +266,7 @@ ZEND_API void gc_init(void)
 		gc_reset();
 	}
 }
-
+// 根据论文 possible_root 是 当 要gc的对象的引用计数器不等于0， 会将对象放在 Roots  上并标志为紫色
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
 	gc_root_buffer *newRoot;

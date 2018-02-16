@@ -1378,7 +1378,7 @@ mysqlnd_com_handshake_create_command(va_list args)
 }
 /* }}} */
 
-
+// 一个简单的工厂模式 ， 通过一个枚举类型执行相应的命令并返回
 
 /* {{{ mysqlnd_get_command */
 static struct st_mysqlnd_protocol_command *

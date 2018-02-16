@@ -2,7 +2,7 @@
 This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Defines for Win32 to make it compatible for MySQL */
-
+/*windows 宏貌似没什么用*/
 #ifndef _MYSQLND_CONFIG_WIN_H
 #define _MYSQLND_CONFIG_WIN_H
 

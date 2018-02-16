@@ -2713,7 +2713,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_
 }
 /* }}} */
 
-
+// 核心函数
 /* {{{ mysqlnd_protocol::send_command */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command)(

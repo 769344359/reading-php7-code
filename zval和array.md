@@ -1,3 +1,4 @@
+
 ## hashtable 
 hashtable 包括 ：
 - 一个 `gc` 结构 ,是帮助垃圾回收而使用的
@@ -40,7 +41,10 @@ typedef struct _Bucket {
 	zend_string      *key;              /* string key or NULL for numerics */
 } Bucket;
 ```
-然后是zval 
+##zval 
+###以下我介绍一下zval
+- 首先看一下zval的定义
+
 ```
 typedef struct _zval_struct     zval;
 
