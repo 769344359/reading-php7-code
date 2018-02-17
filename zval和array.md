@@ -23,7 +23,7 @@ struct _zend_array {
 		} v;
 		uint32_t flags;
 	} u;
-	uint32_t          nTableMask;
+	uint32_t          nTableMask
 	Bucket           *arData;
 	uint32_t          nNumUsed;
 	uint32_t          nNumOfElements;
