@@ -319,17 +319,17 @@ static zend_op_array *zend_compile(int type)   // 核心函数 貌似没有注�
 	...
 	if (!zendparse()) {         // 重点函数  yyparse 生成语法树
 		...
-		zend_op_array *original_active_op_array = CG(active_op_array);
+		zend_op_array *original_active_op_array = CG(active_op_array);  // 保存现在已经有了的op_array
 
-		op_array = emalloc(sizeof(zend_op_array));
-		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
-		CG(active_op_array) = op_array;
+		op_array = emalloc(sizeof(zend_op_array));         
+		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);  // 初始化op_array
+		CG(active_op_array) = op_array;      // CG(ast) 指向 op_array
 		...
-		zend_compile_top_stmt(CG(ast));
-		CG(zend_lineno) = last_lineno;
-		zend_emit_final_return(type == ZEND_USER_FUNCTION);
+		zend_compile_top_stmt(CG(ast));     // 生成opcode
+		CG(zend_lineno) = last_lineno;       // 记录行号
+		zend_emit_final_return(type == ZEND_USER_FUNCTION); // 自定义函数插入return opcode
 		...
-		CG(active_op_array) = original_active_op_array;
+		CG(active_op_array) = original_active_op_array;   
 	}
 	...
 	return op_array;
