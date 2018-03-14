@@ -335,13 +335,10 @@ static zend_op_array *zend_compile(int type)   // 核心函数 貌似没有注�
 	return op_array;
 }
 ```
-> 快到了最后的几步了
+`zend_compile 函数主要包括以下几个内容：`
+- `zendparse` 词法分析语法分析并生成语法树语法树会保存在 CG(ast) 上面
+  - CG = compile global
+  - ast = Abstract Syntax Tree (抽象语法树)
 
-我们看到
-```
-static zend_op_array *zend_compile(int type)   // 核心函数 貌似没有注释
-{
 
-}
-```
 
