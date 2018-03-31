@@ -57,8 +57,11 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 ```
 
 首先引入query string 的概念
+[rfc7482](https://tools.ietf.org/html/rfc7482)
+
 > The HTTP query string is formed using a concatenation of the
    question mark character ('?', US-ASCII value 0x003F), the JSON object
    value associated with the object being searched for, the equal sign
    character ('=', US-ASCII value 0x003D), and the search pattern.
+
 query string 也是在这里解析的
