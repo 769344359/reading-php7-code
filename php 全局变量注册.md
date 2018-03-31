@@ -8,75 +8,8 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	int free_buffer = 0;
 	char *strtok_buf = NULL;
 	zend_long count = 0;
-
-	ZVAL_UNDEF(&array);
-	switch (arg) {
-		case PARSE_POST:
-		case PARSE_GET:
-		case PARSE_COOKIE:
-			array_init(&array);
-			switch (arg) {
-				case PARSE_POST:
-					zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_POST]);
-					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_POST], &array);
-					break;
-				case PARSE_GET:
-					zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_GET]);
-					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_GET], &array);
-					break;
-				case PARSE_COOKIE:
-					zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_COOKIE]);
-					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_COOKIE], &array);
-					break;
-			}
-			break;
-		default:
-			ZVAL_COPY_VALUE(&array, destArray);
-			break;
-	}
-
-	if (arg == PARSE_POST) {
-		sapi_handle_post(&array);
-		return;
-	}
-
-	if (arg == PARSE_GET) {		/* GET data */
-		c_var = SG(request_info).query_string;
-		if (c_var && *c_var) {
-			res = (char *) estrdup(c_var);
-			free_buffer = 1;
-		} else {
-			free_buffer = 0;
-		}
-	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
-		c_var = SG(request_info).cookie_data;
-		if (c_var && *c_var) {
-			res = (char *) estrdup(c_var);
-			free_buffer = 1;
-		} else {
-			free_buffer = 0;
-		}
-	} else if (arg == PARSE_STRING) {		/* String data */
-		res = str;
-		free_buffer = 1;
-	}
-
-	if (!res) {
-		return;
-	}
-
-	switch (arg) {
-		case PARSE_GET:
-		case PARSE_STRING:
-			separator = (char *) estrdup(PG(arg_separator).input);
-			break;
-		case PARSE_COOKIE:
-			separator = ";\0";
-			break;
-	}
-
+        ...
 	var = php_strtok_r(res, separator, &strtok_buf);
-
 	while (var) {
 		val = strchr(var, '=');
 
@@ -119,16 +52,13 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			}
 			efree(val);
 		}
-next_cookie:
-		var = php_strtok_r(NULL, separator, &strtok_buf);
-	}
-
-	if (arg != PARSE_COOKIE) {
-		efree(separator);
-	}
-
-	if (free_buffer) {
-		efree(res);
-	}
+                ...
 }
 ```
+
+首先引入query string 的概念
+> The HTTP query string is formed using a concatenation of the
+   question mark character ('?', US-ASCII value 0x003F), the JSON object
+   value associated with the object being searched for, the equal sign
+   character ('=', US-ASCII value 0x003D), and the search pattern.
+query string 也是在这里解析的
