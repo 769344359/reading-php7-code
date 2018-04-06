@@ -1,0 +1,33 @@
+```
+#0  php_default_treat_data (arg=1, str=0x0, destArray=0x0)
+    at /home/dinosaur/Downloads/php-7.2.2/main/php_variables.c:435
+#1  0x00000000007a736e in mbstr_treat_data (arg=1, str=0x0, destArray=0x0)
+    at /home/dinosaur/Downloads/php-7.2.2/ext/mbstring/mb_gpc.c:69
+#2  0x0000000000b12557 in php_auto_globals_create_get (name=0x18c5a00)
+    at /home/dinosaur/Downloads/php-7.2.2/main/php_variables.c:703
+#3  0x0000000000b85013 in zend_activate_auto_globals ()
+    at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_compile.c:1699
+#4  0x0000000000b123a2 in php_hash_environment ()
+    at /home/dinosaur/Downloads/php-7.2.2/main/php_variables.c:692
+#5  0x0000000000af6f44 in php_request_startup () at /home/dinosaur/Downloads/php-7.2.2/main/main.c:1693
+#6  0x0000000000cd1bcb in php_cli_server_request_startup (server=0x1867780 <server>, client=0x1ac59f0)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:2073
+#7  0x0000000000cd206e in php_cli_server_dispatch (server=0x1867780 <server>, client=0x1ac59f0)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:2145
+#8  0x0000000000cd2b6f in php_cli_server_recv_event_read_request (server=0x1867780 <server>, client=0x1ac59f0)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:2377
+#9  0x0000000000cd2ee1 in php_cli_server_do_event_for_each_fd_callback (_params=0x7fffffffca40, fd=4, event=1)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:2455
+#10 0x0000000000cce6f8 in php_cli_server_poller_iter_on_active (poller=0x1867788 <server+8>, 
+    opaque=0x7fffffffca40, callback=0xcd2cfe <php_cli_server_do_event_for_each_fd_callback>)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:846
+#11 0x0000000000cd2fc1 in php_cli_server_do_event_for_each_fd (server=0x1867780 <server>, 
+    rhandler=0xcd2a21 <php_cli_server_recv_event_read_request>, whandler=0xcd2baa <php_cli_server_send_event>)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:2478
+#12 0x0000000000cd3049 in php_cli_server_do_event_loop (server=0x1867780 <server>)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:2488
+#13 0x0000000000cd3410 in do_cli_server (argc=3, argv=0x189d870)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli_server.c:2610
+#14 0x0000000000cc9067 in main (argc=3, argv=0x189d870)
+    at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli.c:1407
+```
