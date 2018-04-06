@@ -24,6 +24,7 @@ typedef struct _zend_ast_zval {
 	zval val;
 } zend_ast_zval;
 ```
+<<<<<<< HEAD
 这三个struct 的前两个元素都是一样的，而zend_ast_zval 则专门多了一个属性zval 来储存值。zend_ast_list 则比zend_ast 多了children 来记录list个数
 
 其中调用顺序如下
@@ -60,3 +61,10 @@ void zend_compile_stmt(zend_ast *ast){ /* {{{ */
 }
 ```
 深度优先便利语法树，然后生成opcode
+=======
+抽象语法树由上面 三个基本struct 组成，其中
+
+- `zend_ast`  是一个基本节点
+- 而`zend_ast_list` 比 `zend_ast` 多一个 children 的属性
+- `zend_ast_zval` 是抽象语法树的叶子
+>>>>>>> 56204ce134d40e221ebcf9c92d8045ddec30f8e3
