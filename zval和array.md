@@ -104,10 +104,23 @@ typedef union _zend_value {
 ```
 ## zend_string
 ```
+// dinosaur\php-7.1.8-src\Zend\zend_string.h
+#define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
+
 struct _zend_string {
 	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
 	size_t            len;
 	char              val[1];
 };
+
+static zend_always_inline zend_string *zend_string_alloc(size_t len, int persistent){
+...
+	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
+...
+}
+```
+```
+
+
 ```
