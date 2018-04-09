@@ -104,7 +104,10 @@ typedef union _zend_value {
 ```
 ## zend_string
 ```
+// dinosaur\php-7.1.8-src\main\php.h
+# define XtOffsetOf(s_type, field) offsetof(s_type, field)
 // dinosaur\php-7.1.8-src\Zend\zend_string.h
+#define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 
 struct _zend_string {
@@ -113,6 +116,7 @@ struct _zend_string {
 	size_t            len;
 	char              val[1];
 };
+typedef struct _zend_string     zend_string;
 
 static zend_always_inline zend_string *zend_string_alloc(size_t len, int persistent){
 ...
@@ -120,7 +124,9 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 ...
 }
 ```
-```
-
-
-```
+`zend_struct` 结构包含以下几个结构
+- `gc` 用于引用计数
+- `h`  计算hash值
+- `size` 要储存的字符串的长度
+- `var` 占位
+`zend_string` 的 结构和 redis 储存字符串的结构类似,都会有一个记录字符串长度的变量
