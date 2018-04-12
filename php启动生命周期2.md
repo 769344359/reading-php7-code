@@ -33,7 +33,7 @@ typedef struct _zend_ast_zval {
 |
 |---zendparse
 |---zend_compile_top_stmt
-|  |---zend_compile_stmt
+|  |---zend_compile_stmt/zend_compile_stmt_list
 |---zend_emit_final_return
 |---pass_two  
 ```
