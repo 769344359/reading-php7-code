@@ -142,4 +142,22 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 ```
-`ZEND_INIT_SYMTABLE(ht)`   展开为 zend_hash_init(ht,n,NULL,ZVAL_PTR_DTOR,0)
+`ZEND_INIT_SYMTABLE(ht)`   展开为 `zend_hash_init(ht,n,NULL,ZVAL_PTR_DTOR,0)`
+
+
+```
+ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+{
+	GC_REFCOUNT(ht) = 1;    // gc  添加计数器
+	GC_TYPE_INFO(ht) = IS_ARRAY;  // 添加类型
+	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+	ht->nTableMask = HT_MIN_MASK;   // 设置默认的掩码
+	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);   // 
+	ht->nNumUsed = 0;  
+	ht->nNumOfElements = 0;
+	ht->nInternalPointer = HT_INVALID_IDX;
+	ht->nNextFreeElement = 0;
+	ht->pDestructor = pDestructor;
+	ht->nTableSize = zend_hash_check_size(nSize);
+}
+```
