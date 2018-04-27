@@ -130,3 +130,16 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 - `size` 要储存的字符串的长度
 - `var` 占位
 `zend_string` 的 结构和 redis 储存字符串的结构类似,都会有一个记录字符串长度的变量
+
+***
+初始化数组
+
+
+```
+#define ZEND_INIT_SYMTABLE(ht)								\
+	ZEND_INIT_SYMTABLE_EX(ht, 8, 0)
+
+#define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
+	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
+```
+`ZEND_INIT_SYMTABLE(ht)`   展开为 zend_hash_init(ht,n,NULL,ZVAL_PTR_DTOR,0)
