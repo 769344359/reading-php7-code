@@ -377,7 +377,7 @@ static void php_load_zend_extension_cb(void *arg)
 
 /* {{{ php_init_config
  */
-int php_init_config(void)
+int 	php_init_config(void)
 {
 	char *php_ini_file_name = NULL;
 	char *php_ini_search_path = NULL;

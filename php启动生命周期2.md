@@ -1,6 +1,4 @@
 # zend_compile
-> `zend_ast zend_ast_list   zend_ast_zval`
-
 先介绍php 的抽象语法树的结构,分别是 `zend_ast` , `zend_ast_list` 以及 `zend_ast_zval` 
 ```
 struct _zend_ast {
@@ -33,7 +31,7 @@ typedef struct _zend_ast_zval {
 |
 |---zendparse
 |---zend_compile_top_stmt
-|  |---zend_compile_stmt/zend_compile_stmt_list
+|  |---zend_compile_stmt
 |---zend_emit_final_return
 |---pass_two  
 ```
@@ -62,27 +60,8 @@ void zend_compile_stmt(zend_ast *ast){ /* {{{ */
 }
 ```
 深度优先便利语法树，然后生成opcode
-
 抽象语法树由上面 三个基本struct 组成，其中
 
 - `zend_ast`  是一个基本节点
 - 而`zend_ast_list` 比 `zend_ast` 多一个 children 的属性
 - `zend_ast_zval` 是抽象语法树的叶子
-
-- 对`zend_ast_list`进行编译
-
-```
-void zend_compile_stmt_list(zend_ast *ast) /* {{{ */
-{
-	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
-	for (i = 0; i < list->children; ++i) {
-		zend_compile_stmt(list->child[i]);
-	}
-}
-static zend_always_inline zend_ast_list *zend_ast_get_list(zend_ast *ast) {
-	ZEND_ASSERT(zend_ast_is_list(ast));
-	return (zend_ast_list *) ast;
-}
-```
-
