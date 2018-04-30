@@ -2,6 +2,7 @@
     "files.associations": {
         "type_traits": "c",
         "zend_api.h": "c",
-        "zend.h": "c"
+        "zend.h": "c",
+        "initializer_list": "cpp"
     }
 }
