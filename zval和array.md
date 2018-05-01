@@ -4,7 +4,7 @@ hashtable 包括 ：
 - 一个 `gc` 结构 ,是帮助垃圾回收而使用的
 - 一个联合体
 - 掩码
-- 桶指针 `arData`
+- 桶指针 `arData`  储存内容的主要的指针
 - 析构函数`pDestructor`
 - 桶的数目 `nTableSize`
 ...
@@ -142,7 +142,9 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 ```
-`ZEND_INIT_SYMTABLE(ht)`   展开为 `zend_hash_init(ht,n,NULL,ZVAL_PTR_DTOR,0)`
+- `ZEND_INIT_SYMTABLE` 展开
+
+`ZEND_INIT_SYMTABLE(ht)`   展开为 `zend_hash_init(ht,8,NULL,ZVAL_PTR_DTOR,0)`
 
 
 ```
@@ -161,36 +163,84 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 	ht->nTableSize = zend_hash_check_size(nSize);
 }
 ```
-
-当插入第一条的时候才会真正初始化数组
+而真正初始化的则是第一次插入的时候，其中调用的是函数`zend_hash_check_init`
 ```
-static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, int packed)
+static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
-	ZEND_ASSERT(!((ht)->u.flags & HASH_FLAG_INITIALIZED));
-	if (packed) {
-		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
-		(ht)->u.flags |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
-		HT_HASH_RESET_PACKED(ht);
-	} else {
-		(ht)->nTableMask = -(ht)->nTableSize;
-		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
-		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
-		if (EXPECTED(ht->nTableMask == (uint32_t)-8)) {
-			Bucket *arData = ht->arData;
-
-			HT_HASH_EX(arData, -8) = -1;
-			HT_HASH_EX(arData, -7) = -1;
-			HT_HASH_EX(arData, -6) = -1;
-			HT_HASH_EX(arData, -5) = -1;
-			HT_HASH_EX(arData, -4) = -1;
-			HT_HASH_EX(arData, -3) = -1;
-			HT_HASH_EX(arData, -2) = -1;
-			HT_HASH_EX(arData, -1) = -1;
-		} else {
-			HT_HASH_RESET(ht);
-		}
+	if (UNEXPECTED(!((ht)->u.flags & HASH_FLAG_INITIALIZED))) {
+		zend_hash_real_init_ex(ht, packed);
 	}
 }
+```
+
+首先打印一下堆栈
+```
+(gdb) bt
+#0  zend_hash_real_init_ex (ht=0x189e760, packed=0) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_hash.c:132
+#1  0x0000000000bd704d in zend_hash_check_init (ht=0x189e760, packed=0) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_hash.c:163
+#2  0x0000000000bd8d0d in _zend_hash_add_or_update_i (ht=0x189e760, key=0x189e7e0, pData=0x7fffffffdac0, flag=2, __zend_filename=0x143d620 "/home/dinosaur/Downloads/php-7.2.2/Zend/zend_hash.h", 
+    __zend_lineno=629) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_hash.c:552
+#3  0x0000000000bd934e in _zend_hash_str_add (ht=0x189e760, str=0x143de48 "application/x-www-form-urlencoded", len=33, pData=0x7fffffffdac0, 
+    __zend_filename=0x143d620 "/home/dinosaur/Downloads/php-7.2.2/Zend/zend_hash.h", __zend_lineno=629) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_hash.c:668
+#4  0x0000000000b05497 in  (ht=0x189e760, str=0x143de48 "application/x-www-form-urlencoded", len=33, pData=0x18324a0 <php_post_entries>, size=32)
+    at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_hash.h:629
+```
+```
+/home/dinosaur/reading-php7-code/Zend/zend_hash.h
+#define HASH_FLAG_INITIALIZED      (1<<3)
+```
+然后我们主要看函数　`zend_hash_add_or_update_i`
+
+```
+static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
+{
+	zend_ulong h;
+	uint32_t nIndex;
+	uint32_t idx;
+	Bucket *p;
+	...
+	if (UNEXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
+		CHECK_INIT(ht, 0);
+		goto add_to_hash;
+	} else if (ht->u.flags & HASH_FLAG_PACKED) {
+		zend_hash_packed_to_hash(ht);
+	} 
+	...
+add_to_hash:
+	idx = ht->nNumUsed++;
+	ht->nNumOfElements++;
+	if (ht->nInternalPointer == HT_INVALID_IDX) {
+		ht->nInternalPointer = idx;
+	}
+	zend_hash_iterators_update(ht, HT_INVALID_IDX, idx);
+	p = ht->arData + idx;
+	p->key = key;
+	if (!ZSTR_IS_INTERNED(key)) {
+		zend_string_addref(key);
+		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_hash_val(key);
+	}
+	p->h = h = ZSTR_H(key);
+	ZVAL_COPY_VALUE(&p->val, pData);
+	nIndex = h | ht->nTableMask;
+	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+
+	return &p->val;
+}
+```
+首先gdb 打印出标志位
+```
+(gdb) p/t  ht->u.flags
+$7 = 10001
+```
+
+首先会进入到第一个分支
+```
+	if (UNEXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
+		CHECK_INIT(ht, 0);
+		goto add_to_hash;
+	}
 ```
 
