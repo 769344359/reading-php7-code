@@ -6,3 +6,4 @@ Reading PHP code
 - [php启动过程](https://github.com/769344359/reading-php7-code/blob/master/php%E5%90%AF%E5%8A%A8.md)
 - [php mysqldn 部分源码分析](https://github.com/769344359/reading-php7-code/blob/master/pdo%20_mysql.md)
 - [zval 和 array](https://github.com/769344359/reading-php7-code/blob/master/zval%E5%92%8Carray.md)
+- [pemalloc 相关函数源码分析](https://github.com/769344359/reading-php7-code/blob/master/pemalloc%E7%9B%B8%E5%85%B3.md)
