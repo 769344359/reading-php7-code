@@ -321,4 +321,38 @@ HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT)
 	} while (0)
  ```
  容易知道展开后等价于`arData` 偏移到第一个`Bucket`
+ 
+ ## 插入数据
+ 分配内存和将arData指向第一个Bucket 之后，继续的操作是插入一个Bucket 结构
+ ```
+ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
+{	
+	...
+	if (UNEXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
+		CHECK_INIT(ht, 0);   // 初始化内存
+		goto add_to_hash;  // 添加Bucket
+	...
+add_to_hash:
+	idx = ht->nNumUsed++;   
+	ht->nNumOfElements++;
+	if (ht->nInternalPointer == HT_INVALID_IDX) {
+		ht->nInternalPointer = idx;
+	}
+	zend_hash_iterators_update(ht, HT_INVALID_IDX, idx);
+	p = ht->arData + idx; // 下一条Bucket
+	p->key = key;   // zend_string    
+	if (!ZSTR_IS_INTERNED(key)) {
+		zend_string_addref(key);
+		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_hash_val(key);
+	}
+	p->h = h = ZSTR_H(key); // 获取hash值 
+	ZVAL_COPY_VALUE(&p->val, pData);
+	nIndex = h | ht->nTableMask;  // hash取余 
+	Z_NEXT(p->val) = HT_HASH(ht, nIndex);  // 将前一个的Bucket 的偏移值记录下来 到next 里面
+	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);  // 在左边 记录下 Bucket 的 arData 偏移量
+
+	return &p->val;
+
+ ```
 
