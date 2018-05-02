@@ -76,6 +76,7 @@ ZEND_MM_MAX_LARGE_SIZE   2*1024*1024 - 4Kb   即  511 页
 
 ```
 > 分配内存小于 3/4 page时
+
 我们重新,当分配的内存小于3/4page 时候，调用函数`zend_mm_alloc_small`
 
  
