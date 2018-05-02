@@ -134,7 +134,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 
 ***
 
-## 初始化数组
+## 第一次插入数组
 
 
 ```
