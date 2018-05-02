@@ -7,6 +7,7 @@ hashtable 包括 ：
 - 桶指针 `arData`  储存内容的主要的指针
 - 析构函数`pDestructor`
 - 桶的数目 `nTableSize`
+
 ...
 ```
 // src\Zend\zend_types.h
@@ -132,7 +133,8 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 `zend_string` 的 结构和 redis 储存字符串的结构类似,都会有一个记录字符串长度的变量
 
 ***
-初始化数组
+
+## 初始化数组
 
 
 ```
@@ -160,19 +162,10 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 	ht->nInternalPointer = HT_INVALID_IDX;
 	ht->nNextFreeElement = 0;
 	ht->pDestructor = pDestructor;
-	ht->nTableSize = zend_hash_check_size(nSize);
+	ht->nTableSize = zend_hash_check_size(nSize);  //nSize =8
 }
 ```
-而真正初始化的则是第一次插入的时候，其中调用的是函数`zend_hash_check_init`
-```
-static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
-{
-	HT_ASSERT(GC_REFCOUNT(ht) == 1);
-	if (UNEXPECTED(!((ht)->u.flags & HASH_FLAG_INITIALIZED))) {
-		zend_hash_real_init_ex(ht, packed);
-	}
-}
-```
+
 
 首先打印一下堆栈
 ```
@@ -239,8 +232,85 @@ $7 = 10001
 首先会进入到第一个分支
 ```
 	if (UNEXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
-		CHECK_INIT(ht, 0);
+		CHECK_INIT(ht, 0); // 真正初始化
 		goto add_to_hash;
 	}
 ```
+现在我们来展开宏`CHECK_INIT`
+```
+#define CHECK_INIT(ht, packed) \
+	zend_hash_check_init(ht, packed)
+```
+所以最后调用的是
+```
+zend_hash_check_init(ht, packed)
+```
+而真正初始化的则是第一次插入的时候，其中调用的是函数`zend_hash_check_init`
+```
+static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
+{
+	HT_ASSERT(GC_REFCOUNT(ht) == 1);
+	if (UNEXPECTED(!((ht)->u.flags & HASH_FLAG_INITIALIZED))) {
+		zend_hash_real_init_ex(ht, packed);
+	}
+}
+```
+然后我们继续看函数`zend_hash_real_init_ex`
+其中
+```
+(gdb) p ht->nTableSize
+$10 = 8
+```
+```
+static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, int packed)
+{
+		...
+		(ht)->nTableMask = -(ht)->nTableSize; // nTableSize = 8 ,所以nTableMask = -8
+		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));  //（１） 分配内存
+		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
+		if (EXPECTED(ht->nTableMask == (uint32_t)-8)) {
+			Bucket *arData = ht->arData;
+
+			HT_HASH_EX(arData, -8) = -1;
+			HT_HASH_EX(arData, -7) = -1;
+			HT_HASH_EX(arData, -6) = -1;
+			HT_HASH_EX(arData, -5) = -1;
+			HT_HASH_EX(arData, -4) = -1;
+			HT_HASH_EX(arData, -3) = -1;
+			HT_HASH_EX(arData, -2) = -1;
+			HT_HASH_EX(arData, -1) = -1;
+		}
+		...
+	
+}
+```
+- 分配内存
+
+下面主要是讨论内存分配
+```
+HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+```
+首先展开宏定义　`HT_SIZE(ht)`
+```
+#define HT_HASH_EX(data, idx) \
+	((uint32_t*)(data))[(int32_t)(idx)]
+#define HT_HASH(ht, idx) \
+	HT_HASH_EX((ht)->arData, idx)
+
+#define HT_HASH_SIZE(nTableMask) \
+	(((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))
+#define HT_DATA_SIZE(nTableSize) \
+	((size_t)(nTableSize) * sizeof(Bucket))
+#define HT_SIZE_EX(nTableSize, nTableMask) \
+	(HT_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
+#define HT_SIZE(ht) \
+	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
+```
+由上面的宏定义可以一步步展开
+- `HT_SIZE(ht)`
+- `HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)`   // 展开HT_SIZE_EX
+- `(size_t)(nTableSize) * sizeof(Bucket) + (((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))`
+
+这个表达式可以几乎等价于
+ `(nTableSize) * sizeof(Bucket)　+(-nTableMask)*(uint32_t)`
 
