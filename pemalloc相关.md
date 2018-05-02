@@ -60,9 +60,22 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 }
 ```
 其中宏`ZEND_MM_MAX_SAMLL_SIZE` 定义为
-···
+```
 php-7.1.8-src\Zend\zend_alloc_sizes.h
+#define ZEND_MM_CHUNK_SIZE (2 * 1024 * 1024)               /* 2 MB  */
+#define ZEND_MM_PAGE_SIZE  (4 * 1024)                      /* 4 KB  */
+#define ZEND_MM_FIRST_PAGE (1)
 #define ZEND_MM_MAX_SMALL_SIZE      3072   // 一页为 4 kb 即小页为 3/4 页
 #define ZEND_MM_MAX_LARGE_SIZE      (ZEND_MM_CHUNK_SIZE - (ZEND_MM_PAGE_SIZE * ZEND_MM_FIRST_PAGE))
 
-···
+```
+展开后
+```
+ZEND_MM_MAX_SMALL_SIZE   3072   // 3/4页
+ZEND_MM_MAX_LARGE_SIZE   2*1024*1024 - 4Kb   即  511 页
+
+```
+> 分配内存小于 3/4 page时
+我们重新,当分配的内存小于3/4page 时候，调用函数`zend_mm_alloc_small`
+
+ 
