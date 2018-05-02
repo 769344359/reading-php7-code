@@ -313,4 +313,12 @@ HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT)
 
 这个表达式可以几乎等价于
  `(nTableSize) * sizeof(Bucket)　+(-nTableMask)*(uint32_t)`
+ 然后 我们主要看一下宏`HT_SET_DATA_ADDR`的展开。
+ 宏定义如下
+ ```
+ #define HT_SET_DATA_ADDR(ht, ptr) do { \
+		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE((ht)->nTableMask)); \
+	} while (0)
+ ```
+ 容易知道展开后等价于`arData` 偏移到第一个`Bucket`
 
