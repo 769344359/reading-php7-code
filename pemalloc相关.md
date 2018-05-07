@@ -81,9 +81,10 @@ ZEND_MM_MAX_LARGE_SIZE   2*1024*1024 - 4Kb   即  511 页
 
 > 调用链：
 ```
-|---zend_mm_alloc_heap
-   |---zend_mm_small_size_to_bin
-      |---zend_mm_small_size_to_bit
+|---zend_mm_alloc_small
+   |---zend_mm_alloc_heap
+      |---zend_mm_small_size_to_bin
+         |---zend_mm_small_size_to_bit
 ```
 当时小页的时候会分成 **30**个等级分配内存,
 分别是 8 16 24  32 40 48 56 64 80 96 112 128 160 192 224 256 320 384 ... 一直到3072
