@@ -6,3 +6,20 @@
 
 下面先看`zend_op`
 
+```
+// php-7.1.8-src\Zend\zend_compile.h
+typedef struct _zend_op zend_op;
+struct _zend_op {
+	const void *handler;
+	znode_op op1;
+	znode_op op2;
+	znode_op result;
+	uint32_t extended_value;
+	uint32_t lineno;
+	zend_uchar opcode;
+	zend_uchar op1_type;
+	zend_uchar op2_type;
+	zend_uchar result_type;
+};
+```
+
