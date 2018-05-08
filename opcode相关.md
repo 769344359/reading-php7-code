@@ -4,6 +4,12 @@
 
 上面是维基百科的操作数和操作码的解释
 
+编译相关主要包括这几个结构
+- `zend_op`
+- `znode_op`
+- `zend_op_array`
+- `zend_execute_data`
+
 下面先看`zend_op`
 
 ```
