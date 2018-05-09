@@ -101,5 +101,22 @@ struct _zend_op_array {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 ```
-
+`zend_execute_data`
+```
+struct _zend_execute_data {
+	const zend_op       *opline;           /* executed opline                */
+	zend_execute_data   *call;             /* current call                   */
+	zval                *return_value;
+	zend_function       *func;             /* executed function              */
+	zval                 This;             /* this + call_info + num_args    */
+	zend_execute_data   *prev_execute_data;
+	zend_array          *symbol_table;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;   /* cache op_array->run_time_cache */
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;         /* cache op_array->literals       */
+#endif
+};
+```
 
