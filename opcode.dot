@@ -1,0 +1,33 @@
+digraph graphname {
+node [fontname = "Verdana", fontsize = 10, color="skyblue", shape="record"];
+zend_execute_data [label="{
+                    <opline>zend_op *opline
+                    |zend_execute_data   *call
+                    |zval   *return_value
+                    |zend_function       *func
+                    |zval                 This;
+                    |zend_execute_data   *prev_execute_data
+                    |zend_array          *symbol_table
+                    |void               **run_time_cache
+                    |<literals>zval                *literals
+                 }"];
+zend_op_array [ label="
+                {
+                    <opcodes>zend_op *opcodes
+                    |<literals>zval *literals
+                    |zend_try_catch_element *try_catch_array
+                    |...
+                }"];
+opcodes [label="
+            <opcodes0>opcodes[0]
+            |<opcodes1>opcodes[1]
+            |opcodes[2]
+            |opcodes[n]
+"];
+literals [shape=record,label="<literals0>literals[0]|<literals1>literals[1]|literals[n]"];
+zend_op_array:literals->literals:literals0;
+zend_execute_data:literals->literals:literals0;
+zend_execute_data:opline->opcodes:opcodes0;
+zend_op_array:opcodes->opcodes:opcodes
+
+} 
