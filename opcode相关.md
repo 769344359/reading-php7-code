@@ -14,7 +14,7 @@
 
 下面先看`zend_op`
 
-```
+```c
 // php-7.1.8-src\Zend\zend_compile.h
 typedef struct _zend_op zend_op;
 struct _zend_op {
@@ -38,7 +38,7 @@ zend_op 结构主要包括三个成员
 > znode_op
 
 这个结构主要用来储存相对的偏移
-```
+```c
 typedef union _znode_op {
 	uint32_t      constant;
 	uint32_t      var;
@@ -55,7 +55,7 @@ typedef union _znode_op {
 } znode_op;
 ```
 
-```
+```c
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
@@ -102,7 +102,7 @@ struct _zend_op_array {
 };
 ```
 `zend_execute_data`
-```
+```c
 struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
@@ -119,7 +119,7 @@ struct _zend_execute_data {
 #endif
 };
 ```
-```
+```c
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
 	uint32_t   quick_arg_flags;
