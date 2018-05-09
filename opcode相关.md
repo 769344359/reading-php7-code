@@ -10,6 +10,8 @@
 - `zend_op_array`
 - `zend_execute_data`
 
+> zend_op
+
 下面先看`zend_op`
 
 ```
@@ -28,4 +30,76 @@ struct _zend_op {
 	zend_uchar result_type;
 };
 ```
+zend_op 结构主要包括三个成员
+- op1 
+- op2
+- result
+
+> znode_op
+
+这个结构主要用来储存相对的偏移
+```
+typedef union _znode_op {
+	uint32_t      constant;
+	uint32_t      var;
+	uint32_t      num;
+	uint32_t      opline_num; /*  Needs to be signed */
+#if ZEND_USE_ABS_JMP_ADDR
+	zend_op       *jmp_addr;
+#else
+	uint32_t      jmp_offset;
+#endif
+#if ZEND_USE_ABS_CONST_ADDR
+	zval          *zv;
+#endif
+} znode_op;
+```
+
+```
+struct _zend_op_array {
+	/* Common elements */
+	zend_uchar type;
+	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+	uint32_t fn_flags;
+	zend_string *function_name;
+	zend_class_entry *scope;
+	zend_function *prototype;
+	uint32_t num_args;
+	uint32_t required_num_args;
+	zend_arg_info *arg_info;
+	/* END of common elements */
+
+	uint32_t *refcount;
+
+	uint32_t last;
+	zend_op *opcodes;   //指针
+
+	int last_var;
+	uint32_t T;
+	zend_string **vars;
+
+	int last_live_range;
+	int last_try_catch;
+	zend_live_range *live_range;
+	zend_try_catch_element *try_catch_array;
+
+	/* static variables support */
+	HashTable *static_variables;
+
+	zend_string *filename;
+	uint32_t line_start;
+	uint32_t line_end;
+	zend_string *doc_comment;
+	uint32_t early_binding; /* the linked list of delayed declarations */
+
+	int last_literal;
+	zval *literals;
+
+	int  cache_size;
+	void **run_time_cache;
+
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
+};
+```
+
 
