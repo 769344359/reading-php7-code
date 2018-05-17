@@ -3,6 +3,7 @@
         "type_traits": "c",
         "zend_api.h": "c",
         "zend.h": "c",
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "typeinfo": "c"
     }
 }

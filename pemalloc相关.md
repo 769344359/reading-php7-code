@@ -1,3 +1,4 @@
+# pemalloc 相关
 在c标准库中有malloc 函数负责分配内存，而php 也使用c实现了一类malloc 函数
 下面主要是分析`pemalloc` 函数
 ```
@@ -68,6 +69,8 @@ php-7.1.8-src\Zend\zend_alloc_sizes.h
 #define ZEND_MM_MAX_SMALL_SIZE      3072   // 一页为 4 kb 即小页为 3/4 页
 #define ZEND_MM_MAX_LARGE_SIZE      (ZEND_MM_CHUNK_SIZE - (ZEND_MM_PAGE_SIZE * ZEND_MM_FIRST_PAGE))
 
+// Zend/zend_alloc.c
+#define ZEND_MM_SMALL_SIZE_TO_BIN(size)  zend_mm_small_size_to_bin(size)
 ```
 展开后
 ```
@@ -79,50 +82,30 @@ ZEND_MM_MAX_LARGE_SIZE   2*1024*1024 - 4Kb   即  511 页
 
 我们重新,当分配的内存小于3/4page 时候，调用函数`zend_mm_alloc_small`
 
-> 调用链：
+函数`zend_mm_alloc_small`　定义：
 ```
-|---zend_mm_alloc_small
-   |---zend_mm_alloc_heap
-      |---zend_mm_small_size_to_bin
-         |---zend_mm_small_size_to_bit
+static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, size_t size, int bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+#if ZEND_MM_STAT
+	do {
+		size_t size = heap->size + bin_data_size[bin_num];
+		size_t peak = MAX(heap->peak, size);
+		heap->size = size;
+		heap->peak = peak;
+	} while (0);
+#endif
+
+	if (EXPECTED(heap->free_slot[bin_num] != NULL)) {
+		zend_mm_free_slot *p = heap->free_slot[bin_num];
+		heap->free_slot[bin_num] = p->next_free_slot;
+		return (void*)p;
+	} else {
+		return zend_mm_alloc_small_slow(heap, bin_num ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	}
+}
 ```
-当时小页的时候会分成 **30**个等级分配内存,
-分别是 8 16 24  32 40 48 56 64 80 96 112 128 160 192 224 256 320 384 ... 一直到3072,而且分配的内存必须是这三十个等级中的一个，比如当需要9 字节 10字节 11 字节 一直到 16 字节都是会统一分配16 字节，当使用完毕后并不会直接返回给操作系统，而是等下一次使用
-```
-// Zend\zend_alloc_sizes.h
-/* num, size, count, pages */
-#define ZEND_MM_BINS_INFO(_, x, y) \
-	_( 0,    8,  512, 1, x, y) \
-	_( 1,   16,  256, 1, x, y) \
-	_( 2,   24,  170, 1, x, y) \
-	_( 3,   32,  128, 1, x, y) \
-	_( 4,   40,  102, 1, x, y) \
-	_( 5,   48,   85, 1, x, y) \
-	_( 6,   56,   73, 1, x, y) \
-	_( 7,   64,   64, 1, x, y) \
-	_( 8,   80,   51, 1, x, y) \
-	_( 9,   96,   42, 1, x, y) \
-	_(10,  112,   36, 1, x, y) \
-	_(11,  128,   32, 1, x, y) \
-	_(12,  160,   25, 1, x, y) \
-	_(13,  192,   21, 1, x, y) \
-	_(14,  224,   18, 1, x, y) \
-	_(15,  256,   16, 1, x, y) \
-	_(16,  320,   64, 5, x, y) \
-	_(17,  384,   32, 3, x, y) \
-	_(18,  448,    9, 1, x, y) \
-	_(19,  512,    8, 1, x, y) \
-	_(20,  640,   32, 5, x, y) \
-	_(21,  768,   16, 3, x, y) \
-	_(22,  896,    9, 2, x, y) \
-	_(23, 1024,    8, 2, x, y) \
-	_(24, 1280,   16, 5, x, y) \
-	_(25, 1536,    8, 3, x, y) \
-	_(26, 1792,   16, 7, x, y) \
-	_(27, 2048,    8, 4, x, y) \
-	_(28, 2560,    8, 5, x, y) \
-	_(29, 3072,    4, 3, x, y)
-```
+
+
 
 
  
