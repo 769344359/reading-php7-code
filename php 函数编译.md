@@ -25,3 +25,15 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 ```
+
+> 语法分析
+
+php 的语法分析是使用bison ，代码如下
+```
+function_declaration_statement:
+	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
+		      zend_ast_get_str($3), $6, NULL, $11, $8); CG(extra_fn_flags) = $9; }
+;
+```
