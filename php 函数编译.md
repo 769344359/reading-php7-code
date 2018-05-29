@@ -59,8 +59,22 @@ function sayHello(){
 }
 sayHello();
 ```
-- 断点
+- 堆栈
+```c
+(gdb) bt
+#0  zend_ast_create_decl (kind=66, flags=0, start_lineno=2, doc_comment=0x0, name=0x7ffff6268be0, child0=0x7ffff6281060, child1=0x0, child2=0x7ffff6281090, child3=0x0)
+    at /home/vagrant/php-7.2.5/Zend/zend_ast.c:81
+#1  0x00000000009a3173 in zendparse () at /home/vagrant/php-7.2.5/Zend/zend_language_parser.c:4843
+#2  0x00000000009a8f82 in zend_compile (type=2) at Zend/zend_language_scanner.l:585
+#3  0x00000000009a91cd in compile_file (file_handle=0x7fffffffd300, type=8) at Zend/zend_language_scanner.l:635
+#4  0x000000000077c7d8 in phar_compile_file (file_handle=0x7fffffffd300, type=8) at /home/vagrant/php-7.2.5/ext/phar/phar.c:3320
+#5  0x0000000000a06883 in zend_execute_scripts (type=8, retval=0x0, file_count=3) at /home/vagrant/php-7.2.5/Zend/zend.c:1490
+#6  0x000000000096ef77 in php_execute_script (primary_file=0x7fffffffd300) at /home/vagrant/php-7.2.5/main/main.c:2590
+#7  0x0000000000af0dcb in do_cli (argc=2, argv=0x16319f0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1011
+#8  0x0000000000af1f7d in main (argc=2, argv=0x16319f0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1404
 ```
+- 断点
+```c
 Breakpoint 1, zend_ast_create_decl (kind=66, flags=0, start_lineno=2, doc_comment=0x0, name=0x7ffff6268be0, child0=0x7ffff6281060, child1=0x0, child2=0x7ffff6281090, child3=0x0)
     at /home/vagrant/php-7.2.5/Zend/zend_ast.c:81
 81              ast = zend_ast_alloc(sizeof(zend_ast_decl));
