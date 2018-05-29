@@ -80,7 +80,7 @@ Breakpoint 1, zend_ast_create_decl (kind=66, flags=0, start_lineno=2, doc_commen
 81              ast = zend_ast_alloc(sizeof(zend_ast_decl));
 ```
 然后打印出名字
-```
+```c
 (gdb) p  (char*)name->val
 $3 = 0x7ffff6268bf8 "sayHello"
 ```
