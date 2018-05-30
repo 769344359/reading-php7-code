@@ -85,4 +85,24 @@ Breakpoint 1, zend_ast_create_decl (kind=66, flags=0, start_lineno=2, doc_commen
 $3 = 0x7ffff6268bf8 "sayHello"
 ```
 
+> 编译完成并放进 `GC(function_table)`
+
+编译出语法树并生成`op_array` 后，会将`op_array` 放进 `GC(function_table)` 里面
+
+- 堆栈
+```
+(gdb) bt
+#0  zend_begin_func_decl (result=0x0, op_array=0x7ffff620d018, decl=0x7ffff6281118) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:5856
+#1  0x00000000009df554 in zend_compile_func_decl (result=0x0, ast=0x7ffff6281118) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:5934
+#2  0x00000000009e60e2 in zend_compile_stmt (ast=0x7ffff6281118) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:8154
+#3  0x00000000009e5d5a in zend_compile_top_stmt (ast=0x7ffff6281118) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:8072
+#4  0x00000000009e5d3c in zend_compile_top_stmt (ast=0x7ffff6281018) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:8067
+#5  0x00000000009a9062 in zend_compile (type=2) at Zend/zend_language_scanner.l:601
+#6  0x00000000009a91cd in compile_file (file_handle=0x7fffffffd300, type=8) at Zend/zend_language_scanner.l:635
+#7  0x000000000077c7d8 in phar_compile_file (file_handle=0x7fffffffd300, type=8) at /home/vagrant/php-7.2.5/ext/phar/phar.c:3320
+#8  0x0000000000a06883 in zend_execute_scripts (type=8, retval=0x0, file_count=3) at /home/vagrant/php-7.2.5/Zend/zend.c:1490
+#9  0x000000000096ef77 in php_execute_script (primary_file=0x7fffffffd300) at /home/vagrant/php-7.2.5/main/main.c:2590
+#10 0x0000000000af0dcb in do_cli (argc=2, argv=0x16319f0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1011
+#11 0x0000000000af1f7d in main (argc=2, argv=0x16319f0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1404
+```
 
