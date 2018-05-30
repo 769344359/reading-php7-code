@@ -104,5 +104,9 @@ $3 = 0x7ffff6268bf8 "sayHello"
 #9  0x000000000096ef77 in php_execute_script (primary_file=0x7fffffffd300) at /home/vagrant/php-7.2.5/main/main.c:2590
 #10 0x0000000000af0dcb in do_cli (argc=2, argv=0x16319f0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1011
 #11 0x0000000000af1f7d in main (argc=2, argv=0x16319f0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1404
+
+
+(gdb) p (char *)decl->name->val
+$76 = 0x7ffff6268bf8 "sayHello
 ```
 
