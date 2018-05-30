@@ -90,7 +90,7 @@ $3 = 0x7ffff6268bf8 "sayHello"
 编译出语法树并生成`op_array` 后，会将`op_array` 放进 `GC(function_table)` 里面
 
 - 堆栈
-```
+```c
 (gdb) bt
 #0  zend_begin_func_decl (result=0x0, op_array=0x7ffff620d018, decl=0x7ffff6281118) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:5856
 #1  0x00000000009df554 in zend_compile_func_decl (result=0x0, ast=0x7ffff6281118) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:5934
@@ -107,6 +107,54 @@ $3 = 0x7ffff6268bf8 "sayHello"
 
 
 (gdb) p (char *)decl->name->val
-$76 = 0x7ffff6268bf8 "sayHello
+$76 = 0x7ffff6268bf8 "sayHello"
+```
+
+```
+static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl) /* {{{ */
+{
+	zend_ast *params_ast = decl->child[0];
+	zend_string *unqualified_name, *name, *lcname, *key;
+	zend_op *opline;
+
+	unqualified_name = decl->name;   // 获得函数名   sayHello
+	op_array->function_name = name = zend_prefix_with_ns(unqualified_name);   // 加上命名空间 拼装成完全限定名
+	lcname = zend_string_tolower(name);
+
+	if (FC(imports_function)) {
+		zend_string *import_name = zend_hash_find_ptr_lc(
+			FC(imports_function), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
+				"because the name is already in use", ZSTR_VAL(name));
+		}
+	}
+
+	if (zend_string_equals_literal(lcname, ZEND_AUTOLOAD_FUNC_NAME)
+		&& zend_ast_get_list(params_ast)->children != 1
+	) {
+		zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
+			ZEND_AUTOLOAD_FUNC_NAME);
+	}
+
+	key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
+	zend_hash_update_ptr(CG(function_table), key, op_array);  // 添加函数 到CG
+
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {    // 闭包处理
+		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
+		opline->op1_type = IS_CONST;
+		LITERAL_STR(opline->op1, key);
+	} else {            
+		opline = get_next_op(CG(active_op_array));
+		opline->opcode = ZEND_DECLARE_FUNCTION;
+		opline->op1_type = IS_CONST;
+		LITERAL_STR(opline->op1, zend_string_copy(lcname));
+		/* RTD key is placed after lcname literal in op1 */
+		zend_add_literal_string(CG(active_op_array), &key);
+		SET_UNUSED(opline->op2);
+	}
+
+	zend_string_release(lcname);
+}
 ```
 
