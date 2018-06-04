@@ -160,7 +160,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 > 参数
 
-```
+```c
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
