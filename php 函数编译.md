@@ -158,3 +158,17 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 }
 ```
 
+> 参数
+
+```
+/* arg_info for user functions */
+typedef struct _zend_arg_info {
+	zend_string *name;
+	zend_string *class_name;
+	zend_uchar type_hint;
+	zend_uchar pass_by_reference;
+	zend_bool allow_null;
+	zend_bool is_variadic;
+} zend_arg_info;
+```
+
