@@ -172,6 +172,18 @@ typedef struct _zend_arg_info {
 } zend_arg_info;
 ```
 
+### 例子
+
+> php 源码
+```php
+<?php
+function sayHello( $tem,$b){
+	$a = 1 +2+$tem+$b;
+}
+$tem = 2;
+sayHello($tem);
+$b  = 1+ 3;
+```
 > 编译语法树
 ```c
 (gdb) p  (char *)((zend_ast_zval *)list->child[0]->child[1])->val.value.str.val
