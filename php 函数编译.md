@@ -197,3 +197,210 @@ $77 = 0x7ffff6202758 "b"
 $88 = 0x7ffff6202718 "String"
 ```
 
+> 编译参数列表
+
+```
+void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+	uint32_t i;
+	zend_op_array *op_array = CG(active_op_array);
+	zend_arg_info *arg_infos;
+	
+	if (return_type_ast) {      // 如果是有返回值 
+		/* Use op_array->arg_info[-1] for return type */
+		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
+		arg_infos->name = NULL;
+		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+		arg_infos->is_variadic = 0;
+		arg_infos->type_hint = 0;
+		arg_infos->allow_null = 0;
+		arg_infos->class_name = NULL;
+
+		if (return_type_ast->attr & ZEND_TYPE_NULLABLE) {
+			arg_infos->allow_null = 1;
+			return_type_ast->attr &= ~ZEND_TYPE_NULLABLE;
+		}
+
+		zend_compile_typename(return_type_ast, arg_infos);
+
+		if (arg_infos->type_hint == IS_VOID && arg_infos->allow_null) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
+		}
+
+		arg_infos++;
+		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+	} else { 
+		if (list->children == 0) {    // 没有参数
+			return;
+		}
+		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children, 0);   // 有参数
+	}
+
+	for (i = 0; i < list->children; ++i) {      // 遍历添加 arg_info
+		zend_ast *param_ast = list->child[i];
+		zend_ast *type_ast = param_ast->child[0];
+		zend_ast *var_ast = param_ast->child[1];
+		zend_ast *default_ast = param_ast->child[2];
+		zend_string *name = zend_ast_get_str(var_ast);
+		zend_bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
+		zend_bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
+
+		znode var_node, default_node;
+		zend_uchar opcode;
+		zend_op *opline;
+		zend_arg_info *arg_info;
+
+		if (zend_is_auto_global(name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s",
+				ZSTR_VAL(name));
+		}
+
+		var_node.op_type = IS_CV;
+		var_node.u.op.var = lookup_cv(CG(active_op_array), zend_string_copy(name));
+
+		if (EX_VAR_TO_NUM(var_node.u.op.var) != i) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter $%s",
+				ZSTR_VAL(name));
+		} else if (zend_string_equals_literal(name, "this")) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as parameter");
+		}
+
+		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Only the last parameter can be variadic");
+		}
+
+		if (is_variadic) {
+			opcode = ZEND_RECV_VARIADIC;
+			default_node.op_type = IS_UNUSED;
+			op_array->fn_flags |= ZEND_ACC_VARIADIC;
+
+			if (default_ast) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Variadic parameter cannot have a default value");
+			}
+		} else if (default_ast) {
+			/* we cannot substitute constants here or it will break ReflectionParameter::getDefaultValueConstantName() and ReflectionParameter::isDefaultValueConstant() */
+			uint32_t cops = CG(compiler_options);
+			CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
+			opcode = ZEND_RECV_INIT;
+			default_node.op_type = IS_CONST;
+			zend_const_expr_to_zval(&default_node.u.constant, default_ast);
+			CG(compiler_options) = cops;
+		} else {
+			opcode = ZEND_RECV;
+			default_node.op_type = IS_UNUSED;
+			op_array->required_num_args = i + 1;
+		}
+
+		opline = zend_emit_op(NULL, opcode, NULL, &default_node);
+		SET_NODE(opline->result, &var_node);
+		opline->op1.num = i + 1;
+
+		arg_info = &arg_infos[i];
+		arg_info->name = zend_string_copy(name);
+		arg_info->pass_by_reference = is_ref;
+		arg_info->is_variadic = is_variadic;
+		arg_info->type_hint = 0;
+		arg_info->allow_null = 1;
+		arg_info->class_name = NULL;
+
+		if (type_ast) {
+			zend_bool has_null_default = default_ast
+				&& (Z_TYPE(default_node.u.constant) == IS_NULL
+					|| (Z_TYPE(default_node.u.constant) == IS_CONSTANT
+						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL") == 0));
+			zend_bool is_explicitly_nullable = (type_ast->attr & ZEND_TYPE_NULLABLE) == ZEND_TYPE_NULLABLE;
+
+			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+			arg_info->allow_null = has_null_default || is_explicitly_nullable;
+
+			type_ast->attr &= ~ZEND_TYPE_NULLABLE;
+			zend_compile_typename(type_ast, arg_info);
+
+			if (arg_info->type_hint == IS_VOID) {
+				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
+			}
+
+			if (type_ast->kind == ZEND_AST_TYPE) {
+				if (arg_info->type_hint == IS_ARRAY) {
+					if (default_ast && !has_null_default
+						&& Z_TYPE(default_node.u.constant) != IS_ARRAY
+						&& !Z_CONSTANT(default_node.u.constant)
+					) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with array type can only be an array or NULL");
+					}
+				} else if (arg_info->type_hint == IS_CALLABLE && default_ast) {
+					if (!has_null_default && !Z_CONSTANT(default_node.u.constant)) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with callable type can only be NULL");
+					}
+				}
+			} else {
+				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
+					if (arg_info->class_name) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with a class type can only be NULL");
+					} else switch (arg_info->type_hint) {
+						case IS_DOUBLE:
+							if (Z_TYPE(default_node.u.constant) != IS_DOUBLE && Z_TYPE(default_node.u.constant) != IS_LONG) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with a float type can only be float, integer, or NULL");
+							}
+							break;
+						
+						case IS_ITERABLE:
+							if (Z_TYPE(default_node.u.constant) != IS_ARRAY) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with iterable type can only be an array or NULL");
+							}
+							break;
+							
+						default:
+							if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with a %s type can only be %s or NULL",
+									zend_get_type_by_const(arg_info->type_hint), zend_get_type_by_const(arg_info->type_hint));
+							}
+							break;
+					}
+				}
+			}
+
+			/* Allocate cache slot to speed-up run-time class resolution */
+			if (opline->opcode == ZEND_RECV_INIT) {
+				if (arg_info->class_name) {
+					zend_alloc_cache_slot(opline->op2.constant);
+				} else {
+					Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = -1;
+				}
+			} else {
+				if (arg_info->class_name) {
+					opline->op2.num = op_array->cache_size;
+					op_array->cache_size += sizeof(void*);
+				} else {
+					opline->op2.num = -1;
+				}
+			}
+		} else {
+			if (opline->opcode == ZEND_RECV_INIT) {
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = -1;
+			} else {
+				opline->op2.num = -1;
+			}
+		}	
+	}
+
+	/* These are assigned at the end to avoid unitialized memory in case of an error */
+	op_array->num_args = list->children;
+	op_array->arg_info = arg_infos;
+
+	/* Don't count the variadic argument */
+	if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+		op_array->num_args--;
+	}
+	zend_set_function_arg_flags((zend_function*)op_array);
+}
+/* }}} */
+```
