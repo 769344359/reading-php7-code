@@ -172,3 +172,10 @@ typedef struct _zend_arg_info {
 } zend_arg_info;
 ```
 
+> 编译语法树
+```c
+(gdb) p  (char *)((zend_ast_zval *)list->child[0]->child[1])->val.value.str.val
+$74 = 0x7ffff6202718 "tem"
+(gdb) p  (char *)((zend_ast_zval *)list->child[1]->child[1])->val.value.str.val
+$77 = 0x7ffff6202758 "b"
+```
