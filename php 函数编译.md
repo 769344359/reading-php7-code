@@ -177,7 +177,7 @@ typedef struct _zend_arg_info {
 > php 源码
 ```php
 <?php
-function sayHello( $tem,$b){
+function sayHello(String $tem,$b){
 	$a = 1 +2+$tem+$b;
 }
 $tem = 2;
@@ -193,5 +193,7 @@ Breakpoint 1, zend_compile_params (ast=0x7ffff6281098, return_type_ast=0x0) at /
 $74 = 0x7ffff6202718 "tem"
 (gdb) p  (char *)((zend_ast_zval *)list->child[1]->child[1])->val.value.str.val
 $77 = 0x7ffff6202758 "b"
+(gdb) p  (char *)((zend_ast_zval *)list->child[0]->child[0])->val.value.str.val
+$88 = 0x7ffff6202718 "String"
 ```
 
