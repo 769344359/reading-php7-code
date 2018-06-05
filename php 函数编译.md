@@ -186,8 +186,12 @@ $b  = 1+ 3;
 ```
 > 编译语法树
 ```c
+Breakpoint 1, zend_compile_params (ast=0x7ffff6281098, return_type_ast=0x0) at /home/vagrant/php-7.2.5/Zend/zend_compile.c:5416
+5416            zend_ast_list *list = zend_ast_get_list(ast);
+
 (gdb) p  (char *)((zend_ast_zval *)list->child[0]->child[1])->val.value.str.val
 $74 = 0x7ffff6202718 "tem"
 (gdb) p  (char *)((zend_ast_zval *)list->child[1]->child[1])->val.value.str.val
 $77 = 0x7ffff6202758 "b"
 ```
+
