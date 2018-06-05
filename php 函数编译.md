@@ -404,3 +404,11 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 }
 /* }}} */
 ```
+
+> 内置类型 
+```
+(gdb) p builtin_types
+$23 = {{name = 0x123c667 "int", name_len = 3, type = 4 '\004'}, {name = 0x123c661 "float", name_len = 5, type = 5 '\005'}, {name = 0x123c683 "string", name_len = 6, type = 6 '\006'}, {
+    name = 0x123c656 "bool", name_len = 4, type = 13 '\r'}, {name = 0x123c68f "void", name_len = 4, type = 18 '\022'}, {name = 0x123c694 "iterable", name_len = 8, type = 19 '\023'}, {
+    name = 0x123c69d "object", name_len = 6, type = 8 '\b'}, {name = 0x0, name_len = 0, type = 0 '\000'}}
+```
