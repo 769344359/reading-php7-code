@@ -18,6 +18,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 	i_init_execute_data(execute_data, op_array, return_value);
 	zend_execute_ex(execute_data);
 	zend_vm_stack_free_call_frame(execute_data);
+}
 
 ```
 
@@ -36,5 +37,6 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 
 	return zend_vm_stack_push_call_frame_ex(used_stack, call_info,   // 实际分配内存会委托给 这个函数
 		func, num_args, called_scope, object);
-
+}
 ```
+- 栈大小的计算方法
