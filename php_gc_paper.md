@@ -35,3 +35,17 @@ the real-world requirements of large and varied programs.
 Furthermore, the fundamental assumption behind tracing collectors, namely that it
 is acceptable to periodically trace all of the live objects in the heap, will not necessarily
 scale to the very large main memories that are becoming increasingly common.
+
+---
+
+首先先确定颜色
+```
+ * BLACK  (GC_BLACK)   - In use or free.   
+ * GREY   (GC_GREY)    - Possible member of cycle.
+ * WHITE  (GC_WHITE)   - Member of garbage cycle.
+ * PURPLE (GC_PURPLE)  - Possible root of cycle
+```
+- 黑色 : 正在被引用或者已经被回收了(不需要再关注了)
+- 灰色 : 可能会被回收的 (计数可能会为0)
+- 白色 : 在gc 中
+- 紫色 : root
