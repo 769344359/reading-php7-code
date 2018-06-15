@@ -48,4 +48,9 @@ scale to the very large main memories that are becoming increasingly common.
 - 黑色 : 正在被引用或者已经被回收了(不需要再关注了)
 - 灰色 : 可能会被回收的 (计数可能会为0)
 - 白色 : 在gc 中
-- 紫色 : root
+- 紫色 : root中
+
+
+---
+
+
