@@ -53,4 +53,78 @@ scale to the very large main memories that are becoming increasingly common.
 
 ---
 
+### 什么时候才可能会变为变为垃圾呢?
+
+1 当引用计数变化的时候可能变为垃圾  
+2 引用计数变化只有两种情况: 增加 和 减少,明显增加的时候不会成为被回收对象  
+    因为还有人引用他  
+3 所以很明显,当计数器减少时候
+
+> 第一步  
+当引用计数器减少时  
+```
+// 当count 减少的实话会触发
+ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
+{
+	gc_root_buffer *newRoot;
+
+	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_active))) {   // 垃圾回收中 或者其他情况   
+		return;
+	}
+
+	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
+	ZEND_ASSERT(EXPECTED(GC_REF_GET_COLOR(ref) == GC_BLACK));
+	ZEND_ASSERT(!GC_ADDRESS(GC_INFO(ref)));
+
+	GC_BENCH_INC(zval_possible_root);
+
+	newRoot = GC_G(unused);
+	if (newRoot) {
+		GC_G(unused) = newRoot->prev;
+	} else if (GC_G(first_unused) != GC_G(last_unused)) {
+		newRoot = GC_G(first_unused);
+		GC_G(first_unused)++;
+	} else {
+		if (!GC_G(gc_enabled)) {
+			return;
+		}
+		GC_REFCOUNT(ref)++;
+		gc_collect_cycles();
+		GC_REFCOUNT(ref)--;
+		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
+			zval_dtor_func(ref);
+			return;
+		}
+		if (UNEXPECTED(GC_INFO(ref))) {
+			return;
+		}
+		newRoot = GC_G(unused);
+		if (!newRoot) {
+#if ZEND_GC_DEBUG
+			if (!GC_G(gc_full)) {
+				fprintf(stderr, "GC: no space to record new root candidate\n");
+				GC_G(gc_full) = 1;
+			}
+#endif
+			return;
+		}
+		GC_G(unused) = newRoot->prev;
+	}
+
+	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
+	GC_INFO(ref) = (newRoot - GC_G(buf)) | GC_PURPLE;
+	newRoot->ref = ref;
+
+	newRoot->next = GC_G(roots).next;
+	newRoot->prev = &GC_G(roots);
+	GC_G(roots).next->prev = newRoot;
+	GC_G(roots).next = newRoot;
+
+	GC_BENCH_INC(zval_buffered);
+	GC_BENCH_INC(root_buf_length);
+	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
+}
+
+```
+
 
