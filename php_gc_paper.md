@@ -127,4 +127,24 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 
 ```
 
+上面只是准备工作,将可能得数组或者对象放在一个双链表里面  
 
+---
+
+真正开始gc 的时候是调用`CollectCycles()`  
+第一步
+markRoot   
+将刚才的双链表遍历及其子节点,若root中节点或者root的子节点第一次被遍历则被标记为灰色,否则则移除出双链表  
+第二步  
+scanRoot 
+遍历所有灰色节点然后  
+如果计数器count > 0 则 将count 再加 1 然后该灰色节点变为黑色(不是垃圾,仍然被引用)  
+否则继续遍历并颜色变白(white)  
+第三步  
+collectRoot
+将root 节点中白色节点移除双链表并回收
+
+
+
+
+ 
