@@ -144,7 +144,16 @@ scanRoot
 collectRoot
 将root 节点中白色节点移除双链表并回收
 
+---
 
+调用流程:
+|--CollectCycles()
+|||----markRoots
+||||||-----markGary
+|||----scanRoots
+||||||-----scan
+|||----collectRoots
+|||||||-makrWhite
 
 
  
