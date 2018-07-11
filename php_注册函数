@@ -1,0 +1,12 @@
+```c
+(gdb) bt
+#0  zend_string_init (str=0x12451b8 "get_resources", len=13, persistent=1) at /home/vagrant/php-7.2.5/Zend/zend_string.h:170
+#1  0x0000000000a0f472 in zend_register_functions (scope=0x0, functions=0x15ca440 <builtin_functions>, function_table=0x0, type=1) at /home/vagrant/php-7.2.5/Zend/zend_API.c:2189
+#2  0x0000000000a0ead8 in zend_register_module_ex (module=0x163ed20) at /home/vagrant/php-7.2.5/Zend/zend_API.c:2061
+#3  0x0000000000a20e6b in zend_startup_builtin_functions () at /home/vagrant/php-7.2.5/Zend/zend_builtin_functions.c:330
+#4  0x0000000000a04f7a in zend_startup (utility_functions=0x7fffffffe1d0, extensions=0x0) at /home/vagrant/php-7.2.5/Zend/zend.c:832
+#5  0x000000000096df47 in php_module_startup (sf=0x160ae80 <cli_sapi_module>, additional_modules=0x0, num_additional_modules=0) at /home/vagrant/php-7.2.5/main/main.c:2157
+#6  0x0000000000aefc24 in php_cli_startup (sapi_module=0x160ae80 <cli_sapi_module>) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:431
+#7  0x0000000000af1ec1 in main (argc=2, argv=0x16319f0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1371
+
+```
