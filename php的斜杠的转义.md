@@ -1,8 +1,15 @@
 ```php
 <?php
-$a = '\\';
+$a = '\\aaa';
+$b = '\aaa';
+$c = "\aaa";
+$d = "\\aaa";
 echo $a;
+echo $b;
+echo $c;
+echo $d;
 ```
+这四个变量分别输出什么呢?
 ```
 	ZVAL_STRINGL(zendlval, yytext+bprefix+1, yyleng-bprefix-2);
 
