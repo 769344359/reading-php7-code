@@ -5,6 +5,7 @@ php 的非常多的语法特性和别的语言不一样,本次则是分析单双
 >>**问题 2** 单引号和双引号有什么不同?
 
 # 前置知识
+[flex 文档](http://westes.github.io/flex/manual/Start-Conditions.html)  
 php 的官方代码是由c 写成的,所以源码都是从main 开始的
 - php 的生命周期  
 生命周期大概是这样:  
