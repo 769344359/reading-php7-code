@@ -35,3 +35,125 @@ the real-world requirements of large and varied programs.
 Furthermore, the fundamental assumption behind tracing collectors, namely that it
 is acceptable to periodically trace all of the live objects in the heap, will not necessarily
 scale to the very large main memories that are becoming increasingly common.
+
+---
+
+首先先确定颜色
+```
+ * BLACK  (GC_BLACK)   - In use or free.   
+ * GREY   (GC_GREY)    - Possible member of cycle.
+ * WHITE  (GC_WHITE)   - Member of garbage cycle.
+ * PURPLE (GC_PURPLE)  - Possible root of cycle
+```
+- 黑色 : 正在被引用或者已经被回收了(不需要再关注了)
+- 灰色 : 可能会被回收的 (计数可能会为0)
+- 白色 : 在gc 中
+- 紫色 : root中
+
+
+---
+
+### 什么时候才可能会变为变为垃圾呢?
+
+1 当引用计数变化的时候可能变为垃圾  
+2 引用计数变化只有两种情况: 增加 和 减少,明显增加的时候不会成为被回收对象  
+    因为还有人引用他  
+3 所以很明显,当计数器减少时候
+
+> 第一步  
+当引用计数器减少时  
+```
+// 当count 减少的实话会触发
+ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
+{
+	gc_root_buffer *newRoot;
+
+	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_active))) {   // 垃圾回收中 或者其他情况   
+		return;
+	}
+
+	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
+	ZEND_ASSERT(EXPECTED(GC_REF_GET_COLOR(ref) == GC_BLACK));
+	ZEND_ASSERT(!GC_ADDRESS(GC_INFO(ref)));
+
+	GC_BENCH_INC(zval_possible_root);
+
+	newRoot = GC_G(unused);
+	if (newRoot) {
+		GC_G(unused) = newRoot->prev;
+	} else if (GC_G(first_unused) != GC_G(last_unused)) {
+		newRoot = GC_G(first_unused);
+		GC_G(first_unused)++;
+	} else {
+		if (!GC_G(gc_enabled)) {
+			return;
+		}
+		GC_REFCOUNT(ref)++;
+		gc_collect_cycles();
+		GC_REFCOUNT(ref)--;
+		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
+			zval_dtor_func(ref);
+			return;
+		}
+		if (UNEXPECTED(GC_INFO(ref))) {
+			return;
+		}
+		newRoot = GC_G(unused);
+		if (!newRoot) {
+#if ZEND_GC_DEBUG
+			if (!GC_G(gc_full)) {
+				fprintf(stderr, "GC: no space to record new root candidate\n");
+				GC_G(gc_full) = 1;
+			}
+#endif
+			return;
+		}
+		GC_G(unused) = newRoot->prev;
+	}
+
+	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
+	GC_INFO(ref) = (newRoot - GC_G(buf)) | GC_PURPLE;
+	newRoot->ref = ref;
+
+	newRoot->next = GC_G(roots).next;
+	newRoot->prev = &GC_G(roots);
+	GC_G(roots).next->prev = newRoot;
+	GC_G(roots).next = newRoot;
+
+	GC_BENCH_INC(zval_buffered);
+	GC_BENCH_INC(root_buf_length);
+	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
+}
+
+```
+
+上面只是准备工作,将可能得数组或者对象放在一个双链表里面  
+
+---
+
+真正开始gc 的时候是调用`CollectCycles()`  
+第一步
+markRoot   
+将刚才的双链表遍历及其子节点,若root中节点或者root的子节点第一次被遍历则被标记为灰色,否则则移除出双链表  
+第二步  
+scanRoot 
+遍历所有灰色节点然后  
+如果计数器count > 0 则 将count 再加 1 然后该灰色节点变为黑色(不是垃圾,仍然被引用)  
+否则继续遍历并颜色变白(white)  
+第三步  
+collectRoot
+将root 节点中白色节点移除双链表并回收
+
+---
+
+调用流程:
+|--CollectCycles()
+|||----markRoots
+||||||-----markGary
+|||----scanRoots
+||||||-----scan
+|||----collectRoots
+|||||||-makrWhite
+
+
+ 

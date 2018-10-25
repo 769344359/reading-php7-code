@@ -1,0 +1,18 @@
+```c
+/* {{{ proto public string ReflectionFunction::getDocComment()
+   Returns the doc comment for this function */
+ZEND_METHOD(reflection_function, getDocComment)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {   // op_array 的doc_comment 就是储存的注解
+		RETURN_STR_COPY(fptr->op_array.doc_comment);
+	}
+	RETURN_FALSE;
+}
+```
