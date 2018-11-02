@@ -41,3 +41,30 @@
 #6  0x0000000000af1f7d in main (argc=2, argv=0x1631ae0) at /home/vagrant/php-7.2.5/sapi/cli/php_cli.c:1404
 
 ```
+
+编译的例程
+```
+//  src\Zend\zend_compile.c
+void zend_compile_coalesce(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *default_ast = ast->child[1];
+
+	znode expr_node, default_node;
+	zend_op *opline;
+	uint32_t opnum;
+
+	zend_compile_var(&expr_node, expr_ast, BP_VAR_IS);
+
+	opnum = get_next_op_number(CG(active_op_array));
+	zend_emit_op_tmp(result, ZEND_COALESCE, &expr_node, NULL);
+
+	zend_compile_expr(&default_node, default_ast);
+
+	opline = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &default_node, NULL);
+	SET_NODE(opline->result, result);
+
+	opline = &CG(active_op_array)->opcodes[opnum];
+	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+}
+```
