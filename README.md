@@ -8,3 +8,4 @@ Reading PHP code
 - [pemalloc 相关函数源码分析](https://github.com/769344359/reading-php7-code/blob/master/pemalloc%E7%9B%B8%E5%85%B3.md)
 - [php 字面量转义时机](https://github.com/769344359/reading-php7-code/blob/master/php_%E8%BD%AC%E4%B9%89%E7%9B%B8%E5%85%B3.md)
 - [php mysqldn 部分源码分析](https://github.com/769344359/reading-php7-code/blob/master/pdo%20_mysql.md)
+-[php  合并](https://segmentfault.com/a/1190000007882768)
