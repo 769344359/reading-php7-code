@@ -10,6 +10,75 @@
 #7  0x0000000000a40ee0 in main (argc=2, argv=0x1441f40) at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli.c:1404
 
 ```
+```
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_op_array *new_op_array;
+
+	zval *inc_filename;
+
+	SAVE_OPLINE();
+	inc_filename = EX_CONSTANT(opline->op1);
+	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
+			destroy_op_array(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (new_op_array == ZEND_FAKE_OP_ARRAY) {
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_TRUE(EX_VAR(opline->result.var));
+		}
+	} else if (EXPECTED(new_op_array != NULL)) {
+		zval *return_value = NULL;
+		zend_execute_data *call;
+
+		if (RETURN_VALUE_USED(opline)) {
+			return_value = EX_VAR(opline->result.var);
+			ZVAL_NULL(return_value);
+		}
+
+		new_op_array->scope = EX(func)->op_array.scope;
+
+		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_CODE | ZEND_CALL_HAS_SYMBOL_TABLE,
+			(zend_function*)new_op_array, 0,
+			Z_TYPE(EX(This)) != IS_OBJECT ? Z_CE(EX(This)) : NULL,
+			Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJ(EX(This)) : NULL);
+
+		if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
+			call->symbol_table = EX(symbol_table);
+		} else {
+			call->symbol_table = zend_rebuild_symbol_table();
+		}
+
+		call->prev_execute_data = execute_data;
+		i_init_code_execute_data(call, new_op_array, return_value);
+		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			ZEND_VM_ENTER();
+		} else {
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			zend_execute_ex(call);
+			zend_vm_stack_free_call_frame(call);
+		}
+
+		destroy_op_array(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_rethrow_exception(execute_data);
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	} else if (RETURN_VALUE_USED(opline)) {
+		ZVAL_FALSE(EX_VAR(opline->result.var));
+	}
+	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_CONTINUE();
+}
+```
 
 ```
 static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type) /* {{{ */
