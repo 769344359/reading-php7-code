@@ -193,7 +193,7 @@ already_compiled:
 }
 /* }}} */
 ```
-`include` 和`require` 和`require_once` `include_once` 会调用
+`include` 和`require` 和`require_once` `include_once` 会调用`php_resolve_path`
 ```
 (gdb) bt
 #0  php_resolve_path (filename=0x7fffef602d98 "aaa.php", filename_length=7, path=0x1481e78 ".:/usr/local/phpfork/lib/php") at /home/dinosaur/Downloads/php-7.2.2/main/fopen_wrappers.c:476
