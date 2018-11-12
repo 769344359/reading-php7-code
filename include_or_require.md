@@ -221,3 +221,9 @@ already_compiled:
 #20 0x0000000000a40ee0 in main (argc=2, argv=0x1441f40) at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli.c:1404
 
 ```
+
+核心代码
+```
+#define DEFAULT_DIR_SEPARATOR  ':'
+end = strchr(p, DEFAULT_DIR_SEPARATOR);
+```
