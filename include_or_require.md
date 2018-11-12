@@ -11,6 +11,36 @@
 
 ```
 ```
+(gdb) bt
+#0  open64 () at ../sysdeps/unix/syscall-template.S:84
+#1  0x00000000008d94c5 in _php_stream_fopen (filename=0x7fffef6627f8 "/home/dinosaur/test/aa.php", mode=0x1064fb1 "rb", opened_path=0x7fffffffa260, options=16512, __php_stream_call_depth=2, 
+    __zend_filename=0x10688f0 "/home/dinosaur/Downloads/php-7.2.2/main/streams/plain_wrapper.c", __zend_lineno=1080, __zend_orig_filename=0x10645f8 "/home/dinosaur/Downloads/php-7.2.2/main/main.c", 
+    __zend_orig_lineno=1414) at /home/dinosaur/Downloads/php-7.2.2/main/streams/plain_wrapper.c:1017
+#2  0x00000000008d9805 in php_plain_files_stream_opener (wrapper=0x13f5000 <php_plain_files_wrapper>, path=0x7fffef6627f8 "/home/dinosaur/test/aa.php", mode=0x1064fb1 "rb", options=16512, 
+    opened_path=0x7fffffffa260, context=0x0, __php_stream_call_depth=1, __zend_filename=0x1067d78 "/home/dinosaur/Downloads/php-7.2.2/main/streams/streams.c", __zend_lineno=2029, 
+    __zend_orig_filename=0x10645f8 "/home/dinosaur/Downloads/php-7.2.2/main/main.c", __zend_orig_lineno=1414) at /home/dinosaur/Downloads/php-7.2.2/main/streams/plain_wrapper.c:1080
+#3  0x00000000008d2b24 in _php_stream_open_wrapper_ex (path=0x7fffef6627f8 "/home/dinosaur/test/aa.php", mode=0x1064fb1 "rb", options=16520, opened_path=0x7fffffffa260, context=0x0, 
+    __php_stream_call_depth=0, __zend_filename=0x10645f8 "/home/dinosaur/Downloads/php-7.2.2/main/main.c", __zend_lineno=1414, __zend_orig_filename=0x0, __zend_orig_lineno=0)
+    at /home/dinosaur/Downloads/php-7.2.2/main/streams/streams.c:2027
+#4  0x00000000008ae2a0 in php_stream_open_for_zend_ex (filename=0x7fffef602b58 "aa.php", handle=0x7fffffffa200, mode=137) at /home/dinosaur/Downloads/php-7.2.2/main/main.c:1414
+#5  0x00000000008ae23e in php_stream_open_for_zend (filename=0x7fffef602b58 "aa.php", handle=0x7fffffffa200) at /home/dinosaur/Downloads/php-7.2.2/main/main.c:1406
+#6  0x000000000097608f in zend_stream_open (filename=0x7fffef602b58 "aa.php", handle=0x7fffffffa200) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_stream.c:131
+#7  0x000000000097626f in zend_stream_fixup (file_handle=0x7fffffffa200, buf=0x7fffffff9ed8, len=0x7fffffff9ee0) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_stream.c:177
+#8  0x00000000008ebeb0 in open_file_for_scanning (file_handle=0x7fffffffa200) at Zend/zend_language_scanner.l:513
+#9  0x00000000008ec489 in compile_file (file_handle=0x7fffffffa200, type=2) at Zend/zend_language_scanner.l:627
+#10 0x00000000007296f0 in phar_compile_file (file_handle=0x7fffffffa200, type=2) at /home/dinosaur/Downloads/php-7.2.2/ext/phar/phar.c:3320
+#11 0x00000000008ec619 in compile_filename (type=2, filename=0x7fffef602b80) at Zend/zend_language_scanner.l:662
+#12 0x00000000009b0524 in zend_include_or_eval (inc_filename=0x7fffef602b80, type=2) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_execute.c:2826
+#13 0x00000000009b861b in ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER () at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_vm_execute.h:3437
+#14 0x0000000000a380d4 in execute_ex (ex=0x7fffef61e030) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_vm_execute.h:59938
+#15 0x0000000000a3d0ab in zend_execute (op_array=0x7fffef67c400, return_value=0x0) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_vm_execute.h:63760
+#16 0x000000000094cd22 in zend_execute_scripts (type=8, retval=0x0, file_count=3) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend.c:1496
+#17 0x00000000008b0b4a in php_execute_script (primary_file=0x7fffffffca40) at /home/dinosaur/Downloads/php-7.2.2/main/main.c:2590
+#18 0x0000000000a3fd23 in do_cli (argc=2, argv=0x1441f40) at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli.c:1011
+#19 0x0000000000a40ee0 in main (argc=2, argv=0x1441f40) at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli.c:1404
+
+```
+```
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
