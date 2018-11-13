@@ -305,3 +305,5 @@ Breakpoint 6, 0x0000000000a4b550 in lstat ()
 > lstat() is identical to stat(), except that if pathname is a symbolic
        link, then it returns information about the link itself, not the file
        that it refers to.
+
+[lstat相关文档](http://man7.org/linux/man-pages/man2/stat.2.html)
