@@ -301,3 +301,7 @@ Breakpoint 6, 0x0000000000a4b550 in lstat ()
 #24 0x0000000000a40ee0 in main (argc=2, argv=0x1441f40) at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli.c:1404
 
 ```
+## lstat
+> lstat() is identical to stat(), except that if pathname is a symbolic
+       link, then it returns information about the link itself, not the file
+       that it refers to.
