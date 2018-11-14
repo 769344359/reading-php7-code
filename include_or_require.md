@@ -307,3 +307,45 @@ Breakpoint 6, 0x0000000000a4b550 in lstat ()
        that it refers to.
 
 [lstat相关文档](http://man7.org/linux/man-pages/man2/stat.2.html)
+
+```
+CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
+{
+	cwd_state new_state;
+	char cwd[MAXPATHLEN];
+
+	/* realpath("") returns CWD */
+	if (!*path) {
+		new_state.cwd = (char*)emalloc(1);
+		new_state.cwd[0] = '\0';
+		new_state.cwd_length = 0;
+		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
+			path = cwd;
+		}
+	} else if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
+					VCWD_GETCWD(cwd, MAXPATHLEN)) {
+		new_state.cwd = estrdup(cwd);
+		new_state.cwd_length = (int)strlen(cwd);
+	} else {
+		new_state.cwd = (char*)emalloc(1);
+		new_state.cwd[0] = '\0';
+		new_state.cwd_length = 0;
+	}
+
+	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
+		efree(new_state.cwd);
+		return NULL;
+	}
+
+	if (real_path) {
+		int copy_len = new_state.cwd_length>MAXPATHLEN-1 ? MAXPATHLEN-1 : new_state.cwd_length;
+		memcpy(real_path, new_state.cwd, copy_len);
+		real_path[copy_len] = '\0';
+		efree(new_state.cwd);
+		return real_path;
+	} else {
+		return new_state.cwd;
+	}
+}
+/* }}} */
+```
