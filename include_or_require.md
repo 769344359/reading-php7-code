@@ -1,3 +1,9 @@
+核心函数  
+1 [chdir](https://linux.die.net/man/2/chdir)  
+
+> chdir() changes the current working directory of the calling process to the directory specified in path
+>> 渣渣翻译chdir 改变可以把当前工作目录改成指定(特定)路径
+
 ```
 (gdb) bt
 #0  zend_include_or_eval (inc_filename=0x7fffef602b80, type=2) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_execute.c:2763
