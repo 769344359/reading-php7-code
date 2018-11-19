@@ -4,6 +4,18 @@
 > chdir() changes the current working directory of the calling process to the directory specified in path
 >> 渣渣翻译chdir 改变可以把当前工作目录改成指定(特定)路径
 
+第一次设置工作目录是在**第一次**执行文件的时候:  
+设置的值是当前**第一个**执行文件的绝对路径
+
+```
+PHPAPI int php_execute_script(zend_file_handle *primary_file)
+{
+	 ...
+			VCWD_CHDIR_FILE(primary_file->filename);
+	 ...
+}
+```
+
 ```
 (gdb) bt
 #0  zend_include_or_eval (inc_filename=0x7fffef602b80, type=2) at /home/dinosaur/Downloads/php-7.2.2/Zend/zend_execute.c:2763
