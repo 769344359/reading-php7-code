@@ -9,7 +9,7 @@
 
 所有的SAPI在执行的时候都会调用`php_execute_script` 这个函数,而这个函数(因为php没有main函数,所以第一次执行的脚本我临时称为主脚本)调用`chdir`这个函数去设置工作目录为第一次执行的脚本的文件的绝对路径
 
-```
+```c
 //  src\Zend\zend_virtual_cwd.h
 #define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir) 
 // src\Zend\zend_virtual_cwd.c
