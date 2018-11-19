@@ -2,10 +2,12 @@
 1 [chdir](https://linux.die.net/man/2/chdir)  
 
 > chdir() changes the current working directory of the calling process to the directory specified in path
->> 渣渣翻译chdir 改变可以把当前工作目录改成指定(特定)路径
+>> 渣渣翻译:chdir 改变可以把当前工作目录改成指定(特定)路径
 
-第一次设置工作目录是在**第一次**执行文件的时候:  
-设置的值是当前**第一次**执行文件的绝对路径
+第一次设置工作目录是在*第一次*执行文件的时候:  
+设置的值是当前*第一次*执行文件的绝对路径
+
+所有的SAPI在执行的时候都会调用`php_execute_script` 这个函数,而这个函数则会在执行主脚本(因为php没有main函数,所以第一次执行的脚本我临时称为主脚本)调用`chdir`这个函数去处理.
 
 ```
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
