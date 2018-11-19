@@ -5,7 +5,7 @@
 >> 渣渣翻译chdir 改变可以把当前工作目录改成指定(特定)路径
 
 第一次设置工作目录是在**第一次**执行文件的时候:  
-设置的值是当前**第一个**执行文件的绝对路径
+设置的值是当前**第一次**执行文件的绝对路径
 
 ```
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
