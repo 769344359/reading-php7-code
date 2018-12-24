@@ -19,3 +19,8 @@ $8 = 0x7fffef602b58 "sayHi"
 #6  0x0000000000a40ee0 in main (argc=2, argv=0x1441f40) at /home/dinosaur/Downloads/php-7.2.2/sapi/cli/php_cli.c:1404
 
 ```
+
+
+ZEND_FREE_SPEC_TMPVAR_LABEL
+ZEND_FE_FREE_SPEC_TMPVAR_LABEL
+
