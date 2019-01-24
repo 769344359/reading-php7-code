@@ -98,3 +98,22 @@ finish:
 /* Mark that we don't need executable stack. */
 .section .note.GNU-stack,"",%progbits
 ```
+
+堆栈
+```
+(gdb) bt
+#0  make_fcontext () at /data/soft/swoole-src/thirdparty/boost/asm/make_x86_64_sysv_elf_gas.S:40
+#1  0x00007fffea2a823c in swoole::Context::Context (this=0x19ae048, stack_size=2097152, fn=0x7fffea327882 <swoole::PHPCoroutine::create_func(void*)>, private_data=0x7fffffffa9c0)
+    at /data/soft/swoole-src/src/coroutine/context.cc:43
+#2  0x00007fffea2a4071 in swoole::Coroutine::Coroutine (this=0x19ae030, fn=0x7fffea327882 <swoole::PHPCoroutine::create_func(void*)>, private_data=0x7fffffffa9c0) at /data/soft/swoole-src/include/coroutine.h:153
+#3  0x00007fffea2a385e in swoole::Coroutine::create (fn=0x7fffea327882 <swoole::PHPCoroutine::create_func(void*)>, args=0x7fffffffa9c0) at /data/soft/swoole-src/src/coroutine/base.cc:40
+#4  0x00007fffea327fb6 in swoole::PHPCoroutine::create (fci_cache=0x7fffffffaa20, argc=0, argv=0x0) at /data/soft/swoole-src/swoole_coroutine.cc:364
+#5  0x00007fffea32c289 in zif_swoole_coroutine_create (execute_data=0x7ffff0c1f0a0, return_value=0x7fffffffab00) at /data/soft/swoole-src/swoole_coroutine_util.cc:434
+#6  0x0000000000afb919 in ZEND_DO_ICALL_SPEC_RETVAL_UNUSED_HANDLER () at /data/soft/php-7.3.1/Zend/zend_vm_execute.h:645
+#7  0x0000000000b63b0f in execute_ex (ex=0x7ffff0c1f030) at /data/soft/php-7.3.1/Zend/zend_vm_execute.h:55414
+#8  0x0000000000b69161 in zend_execute (op_array=0x7ffff0c7a300, return_value=0x0) at /data/soft/php-7.3.1/Zend/zend_vm_execute.h:60834
+#9  0x0000000000a98fa5 in zend_execute_scripts (type=8, retval=0x0, file_count=3) at /data/soft/php-7.3.1/Zend/zend.c:1568
+#10 0x0000000000a093dd in php_execute_script (primary_file=0x7fffffffe1e0) at /data/soft/php-7.3.1/main/main.c:2630
+#11 0x0000000000b6bbca in do_cli (argc=2, argv=0x1754bf0) at /data/soft/php-7.3.1/sapi/cli/php_cli.c:997
+#12 0x0000000000b6cb36 in main (argc=2, argv=0x1754bf0) at /data/soft/php-7.3.1/sapi/cli/php_cli.c:1389
+```
