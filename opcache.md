@@ -1,3 +1,6 @@
+编译的时候会执行`zend_compile_file` 这个函数指针
+
+
 ```
 /* zend_compile() replacement */
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
