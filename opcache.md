@@ -1,4 +1,16 @@
-编译的时候会执行`zend_compile_file` 这个函数指针
+编译的时候会执行`zend_compile_file` 这个函数指针,这个函数指针就像是java的接口(interface)或者是golang 的接口.  
+一般没开opcache走的是`phar_compile_file`  这个函数  
+堆栈如下  
+```
+(gdb) bt
+#0  compile_file (file_handle=0x7fffffffd1d0, type=8) at Zend/zend_language_scanner.l:622
+#1  0x00000000006f5abf in phar_compile_file (file_handle=0x7fffffffd1d0, type=8) at /home/vagrant/php-7.2.13/ext/phar/phar.c:3329
+#2  0x0000000000919d28 in zend_execute_scripts (type=8, retval=0x0, file_count=3) at /home/vagrant/php-7.2.13/Zend/zend.c:1496
+#3  0x000000000087d9d9 in php_execute_script (primary_file=0x7fffffffd1d0) at /home/vagrant/php-7.2.13/main/main.c:2590
+#4  0x0000000000a0d115 in do_cli (argc=2, argv=0x13f9790) at /home/vagrant/php-7.2.13/sapi/cli/php_cli.c:1011
+#5  0x0000000000a0e2d2 in main (argc=2, argv=0x13f9790) at /home/vagrant/php-7.2.13/sapi/cli/php_cli.c:1403
+
+```
 ```
 //路径 php-src/ext/opcache/ZendAccelerator.c
 /* zend_compile() replacement */
