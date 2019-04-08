@@ -1,6 +1,6 @@
 编译的时候会执行`zend_compile_file` 这个函数指针,这个函数指针就像是java的接口(interface)或者是golang 的接口.  
 一般没开opcache走的是`phar_compile_file`  这个函数  
-堆栈如下  
+###  没有开启opcache堆栈:  
 ```
 (gdb) bt
 #0  compile_file (file_handle=0x7fffffffd1d0, type=8) at Zend/zend_language_scanner.l:622
@@ -13,7 +13,7 @@
 ```
 
 开启opcache后不会走 `phar_compile_file`,而是走函数`persistent_compile_file`  
-堆栈:  
+### opcache开启后堆栈:  
 ```
 #0  persistent_compile_file (file_handle=0x7fffffffd1d0, type=8) at /home/vagrant/php-7.2.13/ext/opcache/ZendAccelerator.c:1740
 #1  0x0000000000919d28 in zend_execute_scripts (type=8, retval=0x0, file_count=3) at /home/vagrant/php-7.2.13/Zend/zend.c:1496
