@@ -1,5 +1,8 @@
 编译的时候会执行`zend_compile_file` 这个函数指针,这个函数指针就像是java的接口(interface)或者是golang 的接口.  
 一般没开opcache走的是`phar_compile_file`  这个函数  
+
+--- 
+
 ###  没有开启opcache堆栈:  
 ```
 (gdb) bt
