@@ -179,3 +179,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 	/* if turned on - check the compiled script ADLER32 checksum */
 	if (persistent_script && ZCG(accel_directives).consisten
+	
+```
+相关参考
+- https://juejin.im/entry/58f092a65c497d006c7d068b
