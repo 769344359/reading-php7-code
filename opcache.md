@@ -181,5 +181,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	if (persistent_script && ZCG(accel_directives).consisten
 	
 ```
+
+---
+首先根据文件看看在不在缓存里面
+```
+p file_handle->filename
+
+```
+
 相关参考
 - https://juejin.im/entry/58f092a65c497d006c7d068b
