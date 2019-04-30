@@ -13,6 +13,8 @@
 #5  0x0000000000b6cb36 in main (argc=2, argv=0x1754d00) at /data/soft/php-7.3.1/sapi/cli/php_cli.c:1389
 
 ```
+----
+首先要结束的是revalidate_freq   就是要校验多少秒后需要更新文件
 ###  revalidate_freq   
 ```
 (gdb) p accel_globals.accel_directives.revalidate_freq
