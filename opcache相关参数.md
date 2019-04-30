@@ -48,5 +48,27 @@ if (!persistent_script) {
 }
         
 ```
-和revalidate_freq  相关的流程就是 如果找到了缓存就校验时间戳是否通过,如果时间戳不通过就置将persistent_script置空,一旦persistent_script置空,就会需要走原来的编译流程生成opcode
+和revalidate_freq  相关的流程就是:
+如果找到了缓存且开启了validate_timestamps就校验时间戳是否通过
+1 通过就没什么事
+2 如果时间戳不通过就置将persistent_script置空,一旦persistent_script置空,就会需要走原来的编译流程生成opcode
 
+那么这个核心函数就是校验时间戳的函数`validate_timestamp_and_record`
+
+这个函数
+```
+int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+{
+	if (persistent_script->timestamp == 0) {   // 0 是个特殊值表示不校验  返回校验通过
+		return SUCCESS; /* Don't check timestamps of preloaded scripts */
+	} else if (ZCG(accel_directives).revalidate_freq &&
+	    persistent_script->dynamic_members.revalidate >= ZCG(request_time)) {   // 如果php.ini 中配置revalidate_freq不为0 且脚本下一次验证时间大于请求时间 返回成功
+		return SUCCESS;
+	} else if (do_validate_timestamps(persistent_script, file_handle) == FAILURE) {
+		return FAILURE;
+	} else {
+		persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;  // 如果脚本经过了时间戳校验函数do_validate_timestamps 的校验,就更新该文件的下一次校验时间为请求时间+ 重新校验间隔revalidate_freq
+		return SUCCESS;
+	}
+}
+```
