@@ -55,7 +55,7 @@ if (!persistent_script) {
 
 那么这个核心函数就是校验时间戳的函数`validate_timestamp_and_record`
 
-这个函数
+这个函数`validate_timestamp_and_record`
 ```
 int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
@@ -72,3 +72,65 @@ int validate_timestamp_and_record(zend_persistent_script *persistent_script, zen
 	}
 }
 ```
+然后我们仔细再进入 do_validate_timestamps 函数
+
+```
+static inline int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+{
+	zend_file_handle ps_handle;
+	zend_string *full_path_ptr = NULL;
+
+	/** check that the persistent script is indeed the same file we cached
+	 * (if part of the path is a symlink than it possible that the user will change it)
+	 * See bug #15140
+	 */
+	if (file_handle->opened_path) {        // 校验软链相关 如果路径不相同了那就校验不通过,需要重新生成
+		if (persistent_script->script.filename != file_handle->opened_path &&
+		    !zend_string_equal_content(persistent_script->script.filename, file_handle->opened_path)) {
+			return FAILURE;
+		}
+	} else {
+		full_path_ptr = accelerator_orig_zend_resolve_path(file_handle->filename, strlen(file_handle->filename));
+		if (full_path_ptr &&
+		    persistent_script->script.filename != full_path_ptr &&
+		    !zend_string_equal_content(persistent_script->script.filename, full_path_ptr)) {
+			zend_string_release_ex(full_path_ptr, 0);
+			return FAILURE;
+		}
+		file_handle->opened_path = full_path_ptr;
+	}
+
+	if (persistent_script->timestamp == 0) {
+		if (full_path_ptr) {
+			zend_string_release_ex(full_path_ptr, 0);
+			file_handle->opened_path = NULL;
+		}
+		return FAILURE;
+	}
+
+	if (zend_get_file_handle_timestamp(file_handle, NULL) == persistent_script->timestamp) {   // 通过glibc 的stat 获取文件的修改时间跟记录的时间一致就校验通过
+		if (full_path_ptr) {
+			zend_string_release_ex(full_path_ptr, 0);
+			file_handle->opened_path = NULL;
+		}
+		return SUCCESS;
+	}
+	if (full_path_ptr) {
+		zend_string_release_ex(full_path_ptr, 0);
+		file_handle->opened_path = NULL;
+	}
+
+	ps_handle.type = ZEND_HANDLE_FILENAME;
+	ps_handle.filename = ZSTR_VAL(persistent_script->script.filename);
+	ps_handle.opened_path = persistent_script->script.filename;
+
+	if (zend_get_file_handle_timestamp(&ps_handle, NULL) == persistent_script->timestamp) {
+		return SUCCESS;
+	}
+
+	return FAILURE;
+}
+```
+
+
+看完函数`do_validate_timestamps` 几乎可以确认只有文件的修改时间和上一次编译时候stat读出来的timestamp是相等才会返回true
