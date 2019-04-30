@@ -141,4 +141,4 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 
 相关参考:  
 - [stat函数](https://linux.die.net/man/2/stat)
-- 这次分析的php源码版本
+- 这次分析的php源码版本7.3.1
