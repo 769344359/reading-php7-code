@@ -134,3 +134,11 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 
 
 看完函数`do_validate_timestamps` 几乎可以确认只有文件的修改时间和上一次编译时候stat读出来的timestamp是相等才会返回true
+
+
+
+---
+
+相关参考:  
+- [stat函数](https://linux.die.net/man/2/stat)
+- 这次分析的php源码版本
