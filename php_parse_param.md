@@ -25,6 +25,30 @@ PHP_FUNCTION(array_slice)
 ```
 Z_PARAM_ARRAY(input)
 ```
+```
+#define Z_PARAM_ARRAY_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_array(_arg, &dest, check_null, 0))) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_ARRAY_EX(dest, check_null, separate) \
+	Z_PARAM_ARRAY_EX2(dest, check_null, separate, separate)
+
+#define Z_PARAM_ARRAY(dest) \
+	Z_PARAM_ARRAY_EX(dest, 0, 0)
+```
+我们把宏`Z_PARAM_ARRAY(input)` 展开
+```
+Z_PARAM_PROLOGUE(0, 0); \
+		if (UNEXPECTED(!zend_parse_arg_array(0, &dest, 0, 0))) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+```
 
 堆栈:
 ```
