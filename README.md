@@ -10,6 +10,7 @@ Reading PHP code
 - [php mysqldn 部分源码分析](https://github.com/769344359/reading-php7-code/blob/master/pdo%20_mysql.md)  
 - [php  合并](https://segmentfault.com/a/1190000007882768)  
 - [PHP 相关宏](https://github.com/769344359/reading-php7-code/blob/master/%E6%89%A9%E5%B1%95%E7%9B%B8%E5%85%B3%E5%AE%8F.md)
+- [异常和错误相关坑](https://github.com/769344359/reading-php7-code/blob/master/%E5%BC%82%E5%B8%B8%E9%94%99%E8%AF%AF%E5%9D%91.md)
 
 ![svg](https://raw.githubusercontent.com/769344359/reading-php7-code/master/parse.svg?sanitize=true)
 
