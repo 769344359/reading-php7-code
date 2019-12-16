@@ -663,7 +663,11 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				stream->writepos -= stream->readpos;
 				stream->readpos = 0;
 			}
-
+			if (stream->readbuflen - stream->writepos < bucket->buflen) {
+				stream->readbuflen += bucket->buflen;
+				stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
+									stream->is_persistent);
+			}
 			/* grow the buffer if required
 			 * TODO: this can fail for persistent streams */
 			if (stream->readbuflen - stream->writepos < stream->chunk_size) {
